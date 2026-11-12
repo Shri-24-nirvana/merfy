@@ -84,3 +84,4 @@ export class InventoryManager {
     return this.rawMaterials.quantity <= 0;
   }
 }
+

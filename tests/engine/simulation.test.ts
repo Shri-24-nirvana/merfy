@@ -162,3 +162,4 @@ describe('Core Simulation Engine', () => {
     expect(cmdRes.error).toContain('COMPLETED');
   });
 });
+

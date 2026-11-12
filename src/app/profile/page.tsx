@@ -7,61 +7,61 @@ import Link from 'next/link';
 
 export default function ProfilePage() {
   const competencies = [
-    { name: 'Capacity & Bottleneck Management', score: 88 },
-    { name: 'Supply Chain & Raw Material Buffering', score: 92 },
-    { name: 'Capital Allocation & CapEx Evaluation', score: 85 },
-    { name: 'Order Fulfillment & SLA Discipline', score: 94 },
-    { name: 'Working Capital & Solvency Control', score: 79 },
+    { name: 'Bottleneck Identification & Line Balancing', score: 92 },
+    { name: 'Supply Chain & Raw Material Buffer Control', score: 89 },
+    { name: 'Capital Allocation & CapEx Evaluation', score: 86 },
+    { name: 'Earliest Due Date (EDD) Fulfillment Discipline', score: 95 },
+    { name: 'Working Capital & Treasury Solvency Control', score: 82 },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-[#080B12] text-[#F3F7FC]">
       <AppNavbar />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div className="bg-surface border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-xl">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg shadow-sky-500/20">
+        <div className="bg-[#151F2D] border border-[#263447] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-card-industrial">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#28D7F2] to-[#9875FF] flex items-center justify-center text-[#080B12] font-black text-2xl shadow-glow-cyan">
             SM
           </div>
 
           <div className="space-y-2 text-center sm:text-left flex-1">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h1 className="text-2xl font-bold text-slate-100">Student Manager</h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/30 text-xs font-mono font-bold">
-                Operations Associate
+              <h1 className="text-2xl font-black text-[#F3F7FC]">Student Manager</h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#28D7F2]/10 text-[#28D7F2] border border-[#28D7F2]/30 text-xs font-mono font-bold">
+                Operations Associate • Tier 1
               </span>
             </div>
-            <p className="text-xs text-slate-400">
-              Department of Business Administration • MBA Operations Track
+            <p className="text-xs text-[#9AA9BB]">
+              Master of Business Administration (MBA) • Operations & Manufacturing Strategy
             </p>
 
-            <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-300 font-mono">
-              <span>Completed Runs: <strong className="text-emerald-400">2</strong></span>
+            <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-[#9AA9BB] font-mono">
+              <span>Completed Runs: <strong className="text-[#39E58C]">2</strong></span>
               <span>•</span>
-              <span>Avg Efficiency: <strong className="text-sky-400">89%</strong></span>
+              <span>Avg Efficiency: <strong className="text-[#28D7F2]">91%</strong></span>
               <span>•</span>
-              <span>Placement Ready: <strong className="text-emerald-400">Yes</strong></span>
+              <span>Placement Ready: <strong className="text-[#39E58C]">Certified</strong></span>
             </div>
           </div>
         </div>
 
         {/* Competencies Breakdown */}
-        <div className="bg-surface border border-slate-800 rounded-2xl p-6 space-y-4">
-          <h2 className="text-base font-bold text-slate-100 flex items-center space-x-2">
-            <Award className="w-4 h-4 text-sky-400" />
+        <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-6 space-y-4 shadow-card-industrial">
+          <h2 className="text-base font-bold text-[#F3F7FC] flex items-center space-x-2 font-mono">
+            <Award className="w-4 h-4 text-[#28D7F2]" />
             <span>Practical Management Competencies Demonstrated</span>
           </h2>
 
           <div className="space-y-4 pt-2">
             {competencies.map(c => (
               <div key={c.name} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-medium">
-                  <span className="text-slate-300">{c.name}</span>
-                  <span className="text-sky-400 font-mono font-bold">{c.score}%</span>
+                <div className="flex justify-between text-xs font-mono font-semibold">
+                  <span className="text-[#F3F7FC]">{c.name}</span>
+                  <span className="text-[#28D7F2]">{c.score}%</span>
                 </div>
-                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-[#080B12] rounded-full h-2.5 overflow-hidden border border-[#263447]">
                   <div
-                    className="h-full rounded-full bg-sky-500"
+                    className="h-full rounded-full bg-[#28D7F2] transition-all duration-500 shadow-glow-cyan"
                     style={{ width: `${c.score}%` }}
                   />
                 </div>

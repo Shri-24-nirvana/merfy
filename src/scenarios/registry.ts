@@ -135,3 +135,4 @@ export function getScenarioConfig(id: string): ScenarioConfig | undefined {
   const meta = getScenarioById(id);
   return meta?.config;
 }
+

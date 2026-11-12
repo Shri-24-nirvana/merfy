@@ -8,3 +8,4 @@ export interface FinancialTransaction {
   description: string;
   resultingCash: number;
 }
+

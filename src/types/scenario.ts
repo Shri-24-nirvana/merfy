@@ -79,3 +79,4 @@ export const ScenarioConfigSchema = z.object({
 });
 
 export type ScenarioConfig = z.infer<typeof ScenarioConfigSchema>;
+

@@ -84,3 +84,4 @@ export interface CommandExecutionResult {
   financialImpact?: number;
   error?: string;
 }
+

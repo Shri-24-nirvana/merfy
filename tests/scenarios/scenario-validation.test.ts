@@ -29,3 +29,4 @@ describe('Scenario Validation & Configuration Schema', () => {
     expect(playable[0].config).toBeDefined();
   });
 });
+

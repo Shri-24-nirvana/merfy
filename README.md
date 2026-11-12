@@ -122,3 +122,4 @@ pnpm start
 5. **Day 3 Demand Surge:** On Day 3 at 09:00, Metro Retailers arrives with a spot contract for 3,200 bottles @ $16/bottle. Decide whether to accept and buy Line 03.
 6. **Clock Speeds:** Toggle simulation speeds between 1x, 2x, and 5x, or pause at critical junctures.
 7. **Performance Results:** Upon Day 7 completion, review your letter grade (A+ through F), net profit, capital efficiency, and provisional assessment rubric.
+

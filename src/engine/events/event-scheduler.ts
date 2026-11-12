@@ -65,3 +65,4 @@ export class EventScheduler {
     return emittedEvents;
   }
 }
+

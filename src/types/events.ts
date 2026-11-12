@@ -31,3 +31,4 @@ export interface DomainEvent {
   severity: 'info' | 'warning' | 'danger' | 'success';
   payload?: Record<string, unknown>;
 }
+

@@ -115,3 +115,4 @@ export class FinanceManager {
     this.state.totalAssets = Math.round((this.state.cash + rawMaterialValue + finishedGoodsValue + machinesBookValue) * 100) / 100;
   }
 }
+

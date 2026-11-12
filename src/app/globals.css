@@ -3,15 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --background: #0B0F14;
-  --surface: #151B23;
-  --surface-secondary: #1D2632;
-  --primary: #38BDF8;
-  --success: #22C55E;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
+  --background: #080B12;
+  --bg-secondary: #101722;
+  --surface-panel: #151F2D;
+  --surface-elevated: #1B2838;
+  --primary: #28D7F2;
+  --secondary: #9875FF;
+  --success: #39E58C;
+  --warning: #FFB547;
+  --danger: #FF5F6D;
+  --border: #263447;
+  --text-primary: #F3F7FC;
+  --text-secondary: #9AA9BB;
 }
 
 body {
@@ -19,23 +22,62 @@ body {
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
+  letter-spacing: -0.01em;
 }
 
-/* Custom slick dark scrollbars */
+/* Futuristic Industrial Grid & Ambient Elements */
+.industrial-grid {
+  background-image: 
+    linear-gradient(to right, rgba(38, 52, 71, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(38, 52, 71, 0.25) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.industrial-grid-dense {
+  background-image: 
+    linear-gradient(to right, rgba(40, 215, 242, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(40, 215, 242, 0.08) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.scanline-overlay {
+  background: linear-gradient(
+    rgba(18, 25, 38, 0) 50%, 
+    rgba(8, 11, 18, 0.35) 50%
+  );
+  background-size: 100% 4px;
+}
+
+/* Glassmorphism Panel Utility */
+.glass-panel {
+  background: rgba(21, 31, 45, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(38, 52, 71, 0.8);
+}
+
+.glass-panel-elevated {
+  background: rgba(27, 40, 56, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(40, 215, 242, 0.2);
+}
+
+/* Custom slick dark industrial scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0F14;
+  background: #080B12;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #263447;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #28D7F2;
 }

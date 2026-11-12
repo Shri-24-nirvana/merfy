@@ -50,3 +50,4 @@ export class SimulationClock {
     this.currentTick = initialTick;
   }
 }
+

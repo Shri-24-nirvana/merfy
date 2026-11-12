@@ -356,3 +356,4 @@ export class CommandProcessor {
     return { result, decisionRecord, events };
   }
 }
+

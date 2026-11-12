@@ -107,3 +107,4 @@ export const ApexBeveragesScenario: ScenarioConfig = {
     'SERVICE_MACHINE',
   ],
 };
+
