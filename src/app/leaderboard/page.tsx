@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { AppNavbar } from '@/components/shared/AppNavbar';
-import { Trophy, Medal, Award, Flame, Users, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Trophy, Medal, Award, Flame, Users, ArrowUpRight, Sparkles, Crown } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LeaderboardPage() {
@@ -14,69 +14,104 @@ export default function LeaderboardPage() {
     { rank: 5, name: 'Devika Patel', school: 'XLRI Jamshedpur', scenario: 'Apex Beverages', score: 87, profit: '$24,500', grade: 'A' },
   ];
 
+  const rankColors = ['text-amber-600', 'text-slate-500', 'text-orange-600'];
+  const rankBg = ['bg-amber-50 border-amber-200', 'bg-slate-50 border-slate-200', 'bg-orange-50 border-orange-200'];
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#080B12] text-[#F3F7FC]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20">
       <AppNavbar />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#FFB547]/15 border border-[#FFB547]/30 text-[#FFB547] text-xs font-mono font-bold mb-2">
-              <Trophy className="w-3.5 h-3.5" />
-              <span>GLOBAL B-SCHOOL COHORT BENCHMARKS</span>
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-[#F3F7FC]">Executive Leaderboard</h1>
-            <p className="text-xs sm:text-sm text-[#9AA9BB] mt-1">
-              Benchmark your operational margin, order fulfillment velocity, and capital discipline against top business school cohorts.
-            </p>
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-50 border-2 border-amber-200 text-amber-700 text-xs font-bold">
+            <Trophy className="w-4 h-4" />
+            <span>GLOBAL B-SCHOOL COHORT RANKINGS</span>
           </div>
-
-          <Link
-            href="/scenarios/apex-beverages"
-            className="px-4 py-2.5 rounded-xl bg-[#28D7F2] hover:bg-[#28D7F2]/90 text-[#080B12] font-black text-xs self-start sm:self-auto transition-all shadow-glow-cyan"
-          >
-            Compete in Apex Beverages
-          </Link>
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-800">Executive Leaderboard</h1>
+          <p className="text-sm text-slate-500 max-w-xl mx-auto">
+            Benchmark your performance against top business school cohorts worldwide.
+          </p>
         </div>
 
-        <div className="bg-[#151F2D] border border-[#263447] rounded-2xl overflow-hidden shadow-card-industrial">
-          <div className="px-6 py-4 bg-[#101722] border-b border-[#263447] flex items-center justify-between text-xs font-bold text-[#9AA9BB] uppercase tracking-wider font-mono">
-            <span>Rank & Student</span>
-            <div className="flex items-center space-x-8">
-              <span>B-School</span>
-              <span>Net Profit</span>
-              <span>Score</span>
+        {/* Top 3 Podium */}
+        <div className="grid grid-cols-3 gap-4">
+          {topPerformers.slice(0, 3).map((p, i) => (
+            <div
+              key={p.rank}
+              className={`rounded-3xl border-2 p-4 text-center space-y-2 ${i === 0 ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 shadow-lg' : rankBg[i]}`}
+            >
+              <div className={`text-2xl font-black ${rankColors[i]}`}>
+                {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+              </div>
+              <div>
+                <div className="font-black text-slate-800 text-sm">{p.name}</div>
+                <div className="text-[11px] text-slate-500">{p.school}</div>
+              </div>
+              <div className={`text-xl font-black ${rankColors[i]}`}>{p.score}</div>
+              <div className="text-xs text-emerald-700 font-bold">{p.profit}</div>
+              <div className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-black ${i === 0 ? 'bg-amber-200 text-amber-800' : 'bg-slate-200 text-slate-700'}`}>
+                {p.grade}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Full Table */}
+        <div className="bg-white rounded-3xl border-2 border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b-2 border-slate-100 flex items-center justify-between">
+            <h2 className="font-black text-slate-800">All Rankings</h2>
+            <div className="flex items-center space-x-2 text-xs text-slate-400">
+              <Users className="w-4 h-4" />
+              <span>247 students</span>
             </div>
           </div>
 
-          <div className="divide-y divide-[#263447]">
-            {topPerformers.map(p => (
-              <div key={p.rank} className="px-6 py-4 flex items-center justify-between hover:bg-[#1B2838] transition-colors">
+          <div className="divide-y divide-slate-100">
+            {topPerformers.map((p) => (
+              <div key={p.rank} className="flex items-center justify-between px-6 py-4 hover:bg-indigo-50/40 transition-colors">
                 <div className="flex items-center space-x-4">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs font-mono ${
-                    p.rank === 1 ? 'bg-[#FFB547]/20 text-[#FFB547] border border-[#FFB547]/40 shadow-sm' :
-                    p.rank === 2 ? 'bg-[#28D7F2]/20 text-[#28D7F2] border border-[#28D7F2]/40' :
-                    p.rank === 3 ? 'bg-[#9875FF]/20 text-[#9875FF] border border-[#9875FF]/40' :
-                    'bg-[#101722] text-[#9AA9BB] border border-[#263447]'
+                  <div className={`w-8 h-8 rounded-xl font-black text-sm flex items-center justify-center ${
+                    p.rank === 1 ? 'bg-amber-100 text-amber-700'
+                    : p.rank === 2 ? 'bg-slate-100 text-slate-600'
+                    : p.rank === 3 ? 'bg-orange-100 text-orange-700'
+                    : 'bg-slate-50 text-slate-500'
                   }`}>
-                    #{p.rank}
+                    {p.rank}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-[#F3F7FC]">{p.name}</h4>
-                    <span className="text-[10px] text-[#627387] font-mono">{p.scenario}</span>
+                    <div className="font-bold text-slate-800 text-sm">{p.name}</div>
+                    <div className="text-xs text-slate-400">{p.school}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-8 text-xs font-mono">
-                  <span className="text-[#9AA9BB] hidden sm:inline">{p.school}</span>
-                  <span className="text-[#39E58C] font-black">{p.profit}</span>
-                  <span className="px-2.5 py-1 rounded bg-[#28D7F2]/10 text-[#28D7F2] font-black border border-[#28D7F2]/25">
-                    {p.score} ({p.grade})
+                <div className="flex items-center space-x-4">
+                  <span className="hidden sm:block text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">
+                    {p.scenario}
                   </span>
+                  <span className="text-sm font-bold text-emerald-700">{p.profit}</span>
+                  <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black ${
+                    p.grade === 'A+' ? 'bg-emerald-100 text-emerald-700'
+                    : p.grade === 'A' ? 'bg-blue-100 text-blue-700'
+                    : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    {p.grade}
+                  </span>
+                  <span className="font-black text-indigo-700 w-8 text-right">{p.score}</span>
                 </div>
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="text-center">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center space-x-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-black text-sm shadow-md hover:shadow-lg transition-shadow"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Improve Your Ranking</span>
+          </Link>
         </div>
       </main>
     </div>

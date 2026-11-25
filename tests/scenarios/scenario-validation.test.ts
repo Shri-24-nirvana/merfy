@@ -24,9 +24,10 @@ describe('Scenario Validation & Configuration Schema', () => {
   it('verifies all catalog scenarios have valid metadata and tags', () => {
     expect(SCENARIO_CATALOG.length).toBeGreaterThanOrEqual(9);
     const playable = SCENARIO_CATALOG.filter(s => s.status === 'PLAYABLE');
-    expect(playable.length).toBe(1);
-    expect(playable[0].id).toBe('apex-beverages');
-    expect(playable[0].config).toBeDefined();
+    expect(playable.length).toBe(9);
+    playable.forEach(scenario => {
+      expect(scenario.config).toBeDefined();
+    });
   });
 });
 

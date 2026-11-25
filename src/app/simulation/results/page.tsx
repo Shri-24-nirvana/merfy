@@ -45,11 +45,7 @@ export default function SimulationResultsPage() {
     if (res) {
       setResults(res);
       if (res.performanceAssessment.grade === 'A+' || res.performanceAssessment.grade === 'A') {
-        confetti({
-          particleCount: 90,
-          spread: 80,
-          origin: { y: 0.6 },
-        });
+        confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
       }
     }
   }, []);
@@ -61,19 +57,19 @@ export default function SimulationResultsPage() {
 
   if (!results) {
     return (
-      <div className="min-h-screen bg-[#080B12] flex flex-col items-center justify-center text-center p-6 space-y-4 text-[#F3F7FC]">
-        <div className="w-12 h-12 rounded-2xl bg-[#151F2D] border border-[#263447] flex items-center justify-center text-[#9AA9BB]">
-          <Clock className="w-6 h-6 text-[#28D7F2]" />
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-white border-2 border-indigo-200 shadow-md flex items-center justify-center">
+          <Clock className="w-7 h-7 text-indigo-500" />
         </div>
-        <h2 className="text-xl font-bold font-mono">No Active Result Available</h2>
-        <p className="text-xs text-[#9AA9BB] max-w-sm">
-          Please run a simulation shift to observe final financial outcomes and assessment.
+        <h2 className="text-xl font-black text-slate-800">No Results Yet</h2>
+        <p className="text-sm text-slate-500 max-w-sm">
+          Run a simulation first to see your performance scorecard.
         </p>
         <Link
           href="/simulation/apex-beverages"
-          className="px-6 py-2.5 rounded-xl bg-[#28D7F2] hover:bg-[#28D7F2]/90 text-[#080B12] font-black text-xs transition-all shadow-glow-cyan"
+          className="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-black text-sm shadow-md hover:shadow-lg transition-all"
         >
-          Enter Live Plant
+          Go to Simulation →
         </Link>
       </div>
     );
@@ -82,325 +78,177 @@ export default function SimulationResultsPage() {
   const { performanceAssessment: assessment } = results;
   const isSuccess = results.finalStatus === 'COMPLETED';
 
+  const chartData = (results.historySnapshots ?? []).slice(-24).map((s: any) => ({
+    name: `D${s.day}`,
+    cash: s.cash,
+    profit: s.profit,
+  }));
+
+  const gradeStyles: Record<string, string> = {
+    'A+': 'from-emerald-400 to-teal-400 shadow-emerald-200',
+    'A': 'from-green-400 to-emerald-400 shadow-green-200',
+    'B': 'from-blue-400 to-indigo-400 shadow-blue-200',
+    'C': 'from-amber-400 to-orange-400 shadow-amber-200',
+    'D': 'from-orange-400 to-red-400 shadow-orange-200',
+    'F': 'from-red-400 to-rose-500 shadow-red-200',
+  };
+  const gradeGrad = gradeStyles[assessment.grade] || gradeStyles['C'];
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#080B12] text-[#F3F7FC]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20">
       <AppNavbar />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Top Header Card */}
-        <div
-          className={`rounded-3xl p-6 sm:p-10 border shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 ${
-            isSuccess
-              ? 'bg-gradient-to-br from-[#101722] via-[#151F2D] to-[#1B2838] border-[#39E58C]/40 shadow-glow-green'
-              : 'bg-gradient-to-br from-[#101722] via-[#151F2D] to-[#1B2838] border-[#FF5F6D]/40 shadow-glow-coral'
-          }`}
-        >
+        {/* Hero Result Card */}
+        <div className={`rounded-3xl p-6 sm:p-10 border-2 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 ${
+          isSuccess
+            ? 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 shadow-lg shadow-emerald-100'
+            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-200 shadow-lg shadow-red-100'
+        }`}>
           <div className="space-y-3 max-w-xl">
-            <div className="flex items-center space-x-2">
-              <span
-                className={`text-xs font-mono font-black uppercase tracking-wider px-3 py-1 rounded-full ${
-                  isSuccess
-                    ? 'bg-[#39E58C]/15 text-[#39E58C] border border-[#39E58C]/30'
-                    : 'bg-[#FF5F6D]/15 text-[#FF5F6D] border border-[#FF5F6D]/30'
-                }`}
-              >
-                {isSuccess ? '★ SCENARIO OBJECTIVES COMPLETED' : '⚠ PLANT LIQUIDATION OCCURRED'}
+            <div className="flex items-center space-x-2 flex-wrap gap-2">
+              <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border-2 ${
+                isSuccess ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : 'bg-red-100 text-red-700 border-red-300'
+              }`}>
+                {isSuccess ? '🎉 Objectives Completed!' : '⚠ Simulation Failed'}
               </span>
-              <span className="text-xs font-mono text-[#9AA9BB]">
-                {results.scenarioName}
-              </span>
+              <span className="text-xs text-slate-500 font-semibold">{results.scenarioName}</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black text-[#F3F7FC] tracking-tight">
-              Executive Evaluation Scorecard
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight">
+              Your Performance Scorecard
             </h1>
 
-            <p className="text-xs sm:text-sm text-[#9AA9BB] leading-relaxed">
+            <p className="text-sm text-slate-500 leading-relaxed">
               {results.completionReason} {assessment.feedback}
             </p>
           </div>
 
-          {/* Letter Grade Hero Badge */}
-          <div className="flex items-center space-x-4 bg-[#080B12] border border-[#263447] rounded-2xl p-5 shadow-card-industrial">
-            <div
-              className={`w-20 h-20 rounded-2xl flex flex-col items-center justify-center font-black text-3xl shadow-lg ${
-                assessment.grade === 'A+' || assessment.grade === 'A'
-                  ? 'bg-[#39E58C]/20 text-[#39E58C] border border-[#39E58C]/40 shadow-glow-green'
-                  : assessment.grade === 'B'
-                  ? 'bg-[#28D7F2]/20 text-[#28D7F2] border border-[#28D7F2]/40'
-                  : assessment.grade === 'C'
-                  ? 'bg-[#FFB547]/20 text-[#FFB547] border border-[#FFB547]/40'
-                  : 'bg-[#FF5F6D]/20 text-[#FF5F6D] border border-[#FF5F6D]/40'
-              }`}
-            >
-              <span>{assessment.grade}</span>
-              <span className="text-[10px] font-mono tracking-normal text-[#9AA9BB] font-normal">
-                {assessment.overallScore}/100
-              </span>
+          {/* Grade Badge */}
+          <div className="flex items-center space-x-4 bg-white border-2 border-slate-100 rounded-3xl p-6 shadow-md flex-shrink-0">
+            <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${gradeGrad} shadow-xl flex flex-col items-center justify-center text-white`}>
+              <span className="text-3xl font-black">{assessment.grade}</span>
             </div>
-
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-mono text-[#627387] tracking-wider">
-                Strategic Rating
-              </span>
-              <span className="text-sm font-bold text-[#F3F7FC] max-w-[150px]">
-                {assessment.strategicRating}
-              </span>
-              <span className="text-[10px] text-[#28D7F2] font-mono mt-1">Formative Feedback</span>
+            <div>
+              <div className="text-2xl font-black text-slate-800">{assessment.overallScore}<span className="text-sm font-semibold text-slate-400">/100</span></div>
+              <div className="text-xs text-slate-400 font-semibold">Performance Score</div>
+              <div className={`text-sm font-bold mt-1 ${isSuccess ? 'text-emerald-600' : 'text-red-600'}`}>
+                {isSuccess ? '✓ Passed' : '✗ Failed'}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Primary Business Metrics 4-Card Grid */}
+        {/* KPI Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-4 shadow-card-industrial">
-            <div className="text-[10px] text-[#9AA9BB] uppercase tracking-wider font-mono flex items-center space-x-1">
-              <DollarSign className="w-3.5 h-3.5 text-[#39E58C]" />
-              <span>Final Treasury Cash</span>
+          {[
+            { label: 'Final Cash', value: `$${Math.round(results.finalCash).toLocaleString()}`, color: 'from-emerald-50 to-teal-50 border-emerald-200', text: 'text-emerald-700', icon: DollarSign },
+            { label: 'Net Profit', value: `$${Math.round(results.profit).toLocaleString()}`, color: results.profit >= 0 ? 'from-blue-50 to-indigo-50 border-blue-200' : 'from-red-50 to-rose-50 border-red-200', text: results.profit >= 0 ? 'text-blue-700' : 'text-red-700', icon: TrendingUp },
+            { label: 'Fulfillment', value: `${assessment.metrics.orderFulfillmentRate}%`, color: 'from-indigo-50 to-purple-50 border-indigo-200', text: 'text-indigo-700', icon: Target },
+            { label: 'Utilization', value: `${assessment.metrics.machineUtilizationAvg}%`, color: 'from-amber-50 to-orange-50 border-amber-200', text: 'text-amber-700', icon: Gauge },
+          ].map(kpi => (
+            <div key={kpi.label} className={`bg-gradient-to-br ${kpi.color} border-2 rounded-2xl p-4 space-y-2`}>
+              <div className="text-[11px] text-slate-500 font-semibold flex items-center space-x-1">
+                <kpi.icon className="w-3.5 h-3.5" />
+                <span>{kpi.label}</span>
+              </div>
+              <div className={`text-lg font-black ${kpi.text}`}>{kpi.value}</div>
             </div>
-            <div className="text-xl font-black font-mono text-[#39E58C] mt-1">
-              ${results.finalCash.toLocaleString()}
-            </div>
-            <div className="text-[10px] text-[#627387] font-mono mt-0.5">Liquid Balance</div>
-          </div>
-
-          <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-4 shadow-card-industrial">
-            <div className="text-[10px] text-[#9AA9BB] uppercase tracking-wider font-mono flex items-center space-x-1">
-              <TrendingUp className="w-3.5 h-3.5 text-[#28D7F2]" />
-              <span>Gross Revenue</span>
-            </div>
-            <div className="text-xl font-black font-mono text-[#28D7F2] mt-1">
-              ${results.revenue.toLocaleString()}
-            </div>
-            <div className="text-[10px] text-[#627387] font-mono mt-0.5">
-              {results.fulfilledBottlesCount.toLocaleString()} bottles dispatched
-            </div>
-          </div>
-
-          <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-4 shadow-card-industrial">
-            <div className="text-[10px] text-[#9AA9BB] uppercase tracking-wider font-mono flex items-center space-x-1">
-              <TrendingDown className="w-3.5 h-3.5 text-[#FFB547]" />
-              <span>Total Expenses</span>
-            </div>
-            <div className="text-xl font-black font-mono text-[#FFB547] mt-1">
-              ${results.expenses.toLocaleString()}
-            </div>
-            <div className="text-[10px] text-[#627387] font-mono mt-0.5">OpEx + Materials</div>
-          </div>
-
-          <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-4 shadow-card-industrial">
-            <div className="text-[10px] text-[#9AA9BB] uppercase tracking-wider font-mono flex items-center space-x-1">
-              <Target className="w-3.5 h-3.5 text-[#9875FF]" />
-              <span>Net Profit</span>
-            </div>
-            <div
-              className={`text-xl font-black font-mono mt-1 ${
-                results.profit >= 0 ? 'text-[#39E58C]' : 'text-[#FF5F6D]'
-              }`}
-            >
-              ${results.profit.toLocaleString()}
-            </div>
-            <div className="text-[10px] text-[#627387] font-mono mt-0.5">
-              {assessment.metrics.profitMargin}% Operating Margin
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Operational Analysis & Telemetry Breakdown */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-6 space-y-4 shadow-card-industrial">
-              <h3 className="text-base font-bold text-[#F3F7FC] flex items-center space-x-2 font-mono">
-                <CheckCircle2 className="w-4 h-4 text-[#39E58C]" />
-                <span>Observed Strategic Strengths</span>
-              </h3>
-              <ul className="space-y-2.5 text-xs text-[#9AA9BB]">
-                {assessment.strengths.map((str, idx) => (
-                  <li key={idx} className="flex items-start space-x-2 bg-[#101722] p-3 rounded-xl border border-[#263447]">
-                    <CheckCircle2 className="w-4 h-4 text-[#39E58C] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#F3F7FC]">{str}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <h3 className="text-base font-bold text-[#F3F7FC] flex items-center space-x-2 pt-2 font-mono">
-                <AlertTriangle className="w-4 h-4 text-[#FFB547]" />
-                <span>Areas for Operational Optimization</span>
-              </h3>
-              <ul className="space-y-2.5 text-xs text-[#9AA9BB]">
-                {assessment.areasForImprovement.map((imp, idx) => (
-                  <li key={idx} className="flex items-start space-x-2 bg-[#101722] p-3 rounded-xl border border-[#263447]">
-                    <AlertTriangle className="w-4 h-4 text-[#FFB547] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#F3F7FC]">{imp}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="p-3 bg-[#101722] rounded-xl border border-[#263447] text-[11px] text-[#9AA9BB]">
-                <strong className="text-[#28D7F2]">Provisional Scoring Model:</strong> {assessment.provisionalNote}
-              </div>
-            </div>
-
-            {/* Run History Trend Chart */}
-            <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-6 space-y-3 shadow-card-industrial">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-[#F3F7FC] font-mono">
-                  Full Shift Financial Trajectory
-                </h3>
-                <span className="text-xs font-mono text-[#9AA9BB]">
-                  {results.totalDays} Sim Days ({results.totalTicks} Ticks)
-                </span>
-              </div>
-
-              <div className="h-48 w-full pt-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Chart */}
+          <div className="lg:col-span-2 bg-white border-2 border-slate-100 rounded-3xl p-6 space-y-4 shadow-sm">
+            <h3 className="font-black text-slate-800">Cash Trajectory</h3>
+            <div className="h-40 w-full">
+              {chartData.length > 1 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={results.historySnapshots} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                  <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="resGlowCash" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#28D7F2" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#28D7F2" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="resGlowProfit" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#39E58C" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#39E58C" stopOpacity={0} />
+                      <linearGradient id="resultsGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="day" stroke="#627387" fontSize={10} tickLine={false} tickFormatter={v => `Day ${v}`} />
-                    <YAxis stroke="#627387" fontSize={10} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#151F2D',
-                        borderColor: '#263447',
-                        borderRadius: '8px',
-                        fontSize: '11px',
-                        color: '#F3F7FC',
-                      }}
-                    />
-                    <Area type="monotone" dataKey="cash" stroke="#28D7F2" strokeWidth={2} fillOpacity={1} fill="url(#resGlowCash)" name="Cash ($)" />
-                    <Area type="monotone" dataKey="profit" stroke="#39E58C" strokeWidth={2} fillOpacity={1} fill="url(#resGlowProfit)" name="Profit ($)" />
+                    <XAxis dataKey="name" stroke="#94A3B8" fontSize={9} tickLine={false} />
+                    <YAxis stroke="#94A3B8" fontSize={9} tickLine={false} />
+                    <Tooltip contentStyle={{ backgroundColor: '#fff', borderColor: '#E2E8F0', borderRadius: '12px', fontSize: '11px' }} />
+                    <Area type="monotone" dataKey="cash" stroke="#6366F1" strokeWidth={2} fillOpacity={1} fill="url(#resultsGrad)" name="Cash ($)" />
                   </AreaChart>
                 </ResponsiveContainer>
-              </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-xs text-slate-400">No snapshot data</div>
+              )}
+            </div>
+
+            {/* Operational stats */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              {[
+                { label: 'Orders Fulfilled', value: results.completedOrdersCount, color: 'text-emerald-700' },
+                { label: 'Orders Failed', value: results.failedOrdersCount, color: 'text-red-600' },
+                { label: 'Bottles Produced', value: results.totalBottlesProduced?.toLocaleString(), color: 'text-indigo-700' },
+                { label: 'Machines Deployed', value: results.machinesCount, color: 'text-purple-700' },
+              ].map(stat => (
+                <div key={stat.label} className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-3">
+                  <div className="text-[10px] text-slate-400 font-semibold">{stat.label}</div>
+                  <div className={`text-base font-black ${stat.color}`}>{stat.value}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right Column: Operations Summary & Actions */}
-          <div className="space-y-6">
-            <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-6 space-y-4 shadow-card-industrial">
-              <h3 className="text-base font-bold text-[#F3F7FC] flex items-center space-x-2 font-mono">
-                <Gauge className="w-4 h-4 text-[#28D7F2]" />
-                <span>Manufacturing Summary</span>
-              </h3>
+          {/* Actions */}
+          <div className="bg-white border-2 border-slate-100 rounded-3xl p-6 space-y-3 shadow-sm">
+            <h3 className="font-black text-slate-800">What Next?</h3>
+            <button
+              onClick={handlePlayAgain}
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-black text-sm flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Play Again</span>
+            </button>
 
-              <div className="space-y-3 text-xs font-mono">
-                <div className="flex justify-between items-center py-1.5 border-b border-[#263447]">
-                  <span className="text-[#9AA9BB]">Contracts Fulfilled:</span>
-                  <span className="font-bold text-[#39E58C]">
-                    {results.completedOrdersCount} / {results.totalOrdersCount}
-                  </span>
-                </div>
+            <Link
+              href="/dashboard"
+              className="w-full py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center space-x-2 transition-colors"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Back to Dashboard</span>
+            </Link>
 
-                <div className="flex justify-between items-center py-1.5 border-b border-[#263447]">
-                  <span className="text-[#9AA9BB]">Contracts Defaulted:</span>
-                  <span className="font-bold text-[#FF5F6D]">
-                    {results.failedOrdersCount}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center py-1.5 border-b border-[#263447]">
-                  <span className="text-[#9AA9BB]">Fulfillment Success Rate:</span>
-                  <span className="font-bold text-[#28D7F2]">
-                    {assessment.metrics.orderFulfillmentRate}%
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center py-1.5 border-b border-[#263447]">
-                  <span className="text-[#9AA9BB]">Total Bottles Produced:</span>
-                  <span className="font-bold text-[#F3F7FC]">
-                    {results.totalBottlesProduced.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center py-1.5 border-b border-[#263447]">
-                  <span className="text-[#9AA9BB]">Machinery Deployed:</span>
-                  <span className="font-bold text-[#F3F7FC]">
-                    {results.machinesCount} Bottling Line(s)
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center py-1.5">
-                  <span className="text-[#9AA9BB]">Remaining Raw Preforms:</span>
-                  <span className="font-bold text-[#F3F7FC]">
-                    {results.remainingRawMaterial.toLocaleString()} units
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="bg-[#101722] border border-[#263447] rounded-2xl p-6 space-y-3 shadow-card-industrial">
-              <button
-                onClick={handlePlayAgain}
-                className="w-full py-3.5 px-4 rounded-xl bg-[#28D7F2] hover:bg-[#28D7F2]/90 text-[#080B12] font-black text-xs flex items-center justify-center space-x-2 transition-all shadow-glow-cyan"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>Play Scenario Again (Try New Strategy)</span>
-              </button>
-
-              <Link
-                href="/dashboard"
-                className="w-full py-3 px-4 rounded-xl bg-[#1B2838] hover:bg-[#263447] text-[#F3F7FC] font-semibold text-xs flex items-center justify-center space-x-2 transition-all"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>Return to Command Deck</span>
-              </Link>
-            </div>
+            <Link
+              href="/leaderboard"
+              className="w-full py-3 px-4 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 text-amber-700 font-bold text-sm flex items-center justify-center space-x-2 transition-colors"
+            >
+              <Award className="w-4 h-4" />
+              <span>View Leaderboard</span>
+            </Link>
           </div>
         </div>
 
-        {/* Interventions Audit Trail */}
-        <div className="bg-[#151F2D] border border-[#263447] rounded-2xl p-6 space-y-4 shadow-card-industrial">
+        {/* Decision Audit */}
+        <div className="bg-white border-2 border-slate-100 rounded-3xl p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#F3F7FC] flex items-center space-x-2 font-mono">
-              <History className="w-4 h-4 text-[#28D7F2]" />
-              <span>Full Decision Audit Trail</span>
+            <h3 className="font-black text-slate-800 flex items-center space-x-2">
+              <History className="w-5 h-5 text-indigo-500" />
+              <span>Decision Audit Trail</span>
             </h3>
-            <span className="text-xs font-mono text-[#9AA9BB]">
-              {results.decisionHistory.length} Actions Recorded
-            </span>
+            <span className="text-xs text-slate-400 font-semibold">{results.decisionHistory.length} actions</span>
           </div>
 
           <div className="max-h-60 overflow-y-auto space-y-2">
-            {results.decisionHistory.map(rec => (
-              <div
-                key={rec.id}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-[#101722] border border-[#263447] text-xs font-mono"
-              >
+            {results.decisionHistory.map((rec: any) => (
+              <div key={rec.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
                 <div className="flex items-center space-x-3">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      rec.result === 'SUCCESS' ? 'bg-[#39E58C]' : 'bg-[#FF5F6D]'
-                    }`}
-                  />
-                  <span className="text-[#627387]">
-                    Day {rec.day}, {rec.hour.toString().padStart(2, '0')}:00
-                  </span>
-                  <span className="font-bold text-[#F3F7FC]">
-                    {rec.commandType.replace(/_/g, ' ')}
-                  </span>
-                  <span className="text-[#9AA9BB] hidden sm:inline truncate max-w-sm">
-                    {rec.message}
-                  </span>
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${rec.result === 'SUCCESS' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                  <span className="text-slate-400 font-mono">D{rec.day} {rec.hour.toString().padStart(2, '0')}:00</span>
+                  <span className="font-bold text-slate-800">{rec.commandType.replace(/_/g, ' ')}</span>
+                  <span className="text-slate-400 hidden sm:inline truncate max-w-xs">{rec.message}</span>
                 </div>
-
                 {rec.financialImpact !== undefined && (
-                  <span
-                    className={`font-black ${
-                      rec.financialImpact >= 0 ? 'text-[#39E58C]' : 'text-[#FF5F6D]'
-                    }`}
-                  >
-                    {rec.financialImpact >= 0 ? '+' : ''}$
-                    {Math.round(rec.financialImpact).toLocaleString()}
+                  <span className={`font-black flex-shrink-0 ${rec.financialImpact >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                    {rec.financialImpact >= 0 ? '+' : ''}${Math.round(rec.financialImpact).toLocaleString()}
                   </span>
                 )}
               </div>

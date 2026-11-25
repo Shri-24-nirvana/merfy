@@ -24,6 +24,16 @@ export const ToastAlert: React.FC<ToastAlertProps> = ({ event, onDismiss }) => {
   const isDanger = event.severity === 'danger';
   const isWarning = event.severity === 'warning';
 
+  const styles = isDanger
+    ? 'bg-red-50 border-red-200 text-red-700'
+    : isWarning
+    ? 'bg-amber-50 border-amber-200 text-amber-700'
+    : isSuccess
+    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+    : 'bg-indigo-50 border-indigo-200 text-indigo-700';
+
+  const Icon = isDanger ? XCircle : isWarning ? AlertTriangle : isSuccess ? CheckCircle2 : Sparkles;
+
   return (
     <AnimatePresence>
       <motion.div
@@ -32,38 +42,18 @@ export const ToastAlert: React.FC<ToastAlertProps> = ({ event, onDismiss }) => {
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         className="fixed top-16 right-4 z-50 max-w-sm w-full select-none"
       >
-        <div
-          className={`rounded-2xl p-4 shadow-2xl border backdrop-blur-xl flex items-start space-x-3.5 ${
-            isSuccess
-              ? 'bg-[#151F2D]/95 border-[#39E58C]/50 text-[#F3F7FC] shadow-glow-green'
-              : isDanger
-              ? 'bg-[#151F2D]/95 border-[#FF5F6D]/50 text-[#F3F7FC] shadow-glow-coral'
-              : isWarning
-              ? 'bg-[#151F2D]/95 border-[#FFB547]/50 text-[#F3F7FC] shadow-sm'
-              : 'bg-[#151F2D]/95 border-[#28D7F2]/50 text-[#F3F7FC] shadow-glow-cyan'
-          }`}
-        >
-          <div className="mt-0.5 flex-shrink-0">
-            {isSuccess && <CheckCircle2 className="w-5 h-5 text-[#39E58C]" />}
-            {isDanger && <XCircle className="w-5 h-5 text-[#FF5F6D]" />}
-            {isWarning && <AlertTriangle className="w-5 h-5 text-[#FFB547]" />}
-            {!isSuccess && !isDanger && !isWarning && <Sparkles className="w-5 h-5 text-[#28D7F2]" />}
-          </div>
+        <div className={`rounded-2xl p-4 shadow-xl border-2 backdrop-blur-sm flex items-start space-x-3.5 ${styles}`}>
+          <Icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h5 className="text-xs font-bold uppercase tracking-wider font-mono text-[#F3F7FC]">
-                {event.title}
-              </h5>
-              <span className="text-[10px] font-mono text-[#28D7F2]">Day {event.day}</span>
+              <h5 className="text-xs font-bold uppercase tracking-wider">{event.title}</h5>
+              <span className="text-[10px] font-mono opacity-70 ml-2">Day {event.day}</span>
             </div>
-            <p className="text-xs mt-1 text-[#9AA9BB] leading-relaxed">{event.description}</p>
+            <p className="text-xs mt-1 opacity-80 leading-relaxed">{event.description}</p>
           </div>
 
-          <button
-            onClick={onDismiss}
-            className="text-[#9AA9BB] hover:text-[#F3F7FC] transition-colors p-1"
-          >
+          <button onClick={onDismiss} className="opacity-60 hover:opacity-100 transition-opacity p-1">
             <X className="w-4 h-4" />
           </button>
         </div>

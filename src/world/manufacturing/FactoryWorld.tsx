@@ -1,34 +1,348 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SimulationState, Machine } from '@/types/simulation';
-import {
-  Zap,
-  Package,
-  Truck,
-  Layers,
-  Activity,
-  CheckCircle2,
-  AlertTriangle,
-  Wrench,
-  Sparkles,
-  Power,
-  Gauge,
-  Clock,
-  ArrowRight,
-  ShieldAlert,
-  Flame,
-  Droplets,
-  Box,
-} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { SimulationState } from '@/types/simulation';
+import { Plus } from 'lucide-react';
 
 interface FactoryWorldProps {
   state: SimulationState;
   onSelectMachine: (machineId: string) => void;
   selectedMachineId: string | null;
   onQuickReorder?: () => void;
-  onQuickOrderDispatch?: (orderId: string) => void;
+}
+
+// ==========================================
+// 1. AUTHENTIC CARTOON BEVERAGE BOTTLE
+// Curving shoulders, slender neck, realistic liquid fill, label, crown cap
+// ==========================================
+const CartoonBottle: React.FC<{
+  filled: number;       // 0 to 100
+  capped: boolean;
+  labelled: boolean;
+  size?: number;        // width in px (default 36)
+  glow?: boolean;
+}> = ({ filled, capped, labelled, size = 36, glow = false }) => {
+  const height = Math.round(size * 2.05); // ~74px for size 36
+
+  return (
+    <div className="relative select-none flex flex-col items-center" style={{ width: size, height }}>
+      {glow && (
+        <div className="absolute inset-0 rounded-full bg-rose-400/40 blur-md pointer-events-none animate-pulse" />
+      )}
+      <svg
+        width={size}
+        height={height}
+        viewBox="0 0 38 78"
+        fill="none"
+        className="drop-shadow-sm overflow-visible"
+      >
+        <defs>
+          {/* Exact interior contour of the bottle for liquid clipping */}
+          <clipPath id={`liquid-clip-${size}`}>
+            <path d="M9 34 C9 26, 14 23, 16 20 L16 14 C16 12, 17 11, 19 11 C21 11, 22 12, 22 14 L22 20 C24 23, 29 26, 29 34 L29 67 C29 72, 26 75, 19 75 C12 75, 9 72, 9 67 Z" />
+          </clipPath>
+
+          {/* Liquid gradient (fruit punch red like the reference game) */}
+          <linearGradient id={`juice-grad-${size}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#FB7185" />
+            <stop offset="40%" stopColor="#E11D48" />
+            <stop offset="100%" stopColor="#9F1239" />
+          </linearGradient>
+
+          {/* Glass Specular highlights */}
+          <linearGradient id={`glass-shine-${size}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
+            <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+          </linearGradient>
+
+          {/* Glass body outer tint */}
+          <linearGradient id={`glass-body-${size}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#F0F9FF" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#E0F2FE" stopOpacity="0.75" />
+          </linearGradient>
+        </defs>
+
+        {/* --- 1. Glass Bottle Base & Silhouette --- */}
+        <path
+          d="M9 34 C9 26, 14 23, 16 20 L16 14 C16 12, 17 11, 19 11 C21 11, 22 12, 22 14 L22 20 C24 23, 29 26, 29 34 L29 67 C29 72, 26 75, 19 75 C12 75, 9 72, 9 67 Z"
+          fill={`url(#glass-body-${size})`}
+          stroke="#7DD3FC"
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+        />
+
+        {/* --- 2. Liquid Fill (0% to 100%) --- */}
+        {filled > 0 && (
+          <g clipPath={`url(#liquid-clip-${size})`}>
+            {/* Liquid body */}
+            <rect
+              x="6"
+              y={75 - (58 * (filled / 100))}
+              width="26"
+              height={58 * (filled / 100) + 4}
+              fill={`url(#juice-grad-${size})`}
+            />
+            {/* Liquid surface meniscus */}
+            <ellipse
+              cx="19"
+              cy={75 - (58 * (filled / 100))}
+              rx="9"
+              ry="2.5"
+              fill="#FDA4AF"
+              opacity="0.9"
+            />
+            {/* Sparkles / bubbles inside liquid */}
+            <circle cx="15" cy={Math.max(38, 70 - (filled * 0.35))} r="1.2" fill="#FFE4E6" opacity="0.7" />
+            <circle cx="23" cy={Math.max(42, 65 - (filled * 0.3))} r="1.6" fill="#FFE4E6" opacity="0.8" />
+          </g>
+        )}
+
+        {/* --- 3. Body Label (wrap around waist) --- */}
+        {labelled && (
+          <g>
+            <path
+              d="M9.5 44 C9.5 44, 19 46, 28.5 44 L28.5 58 C28.5 58, 19 60, 9.5 58 Z"
+              fill="#FFFFFF"
+              stroke="#CBD5E1"
+              strokeWidth="0.8"
+            />
+            {/* Colored brand band on label */}
+            <path
+              d="M9.5 47 C9.5 47, 19 49, 28.5 47 L28.5 53 C28.5 53, 19 55, 9.5 53 Z"
+              fill="#4338CA"
+            />
+            {/* Gold emblem */}
+            <circle cx="19" cy="50" r="2.2" fill="#F59E0B" />
+          </g>
+        )}
+
+        {/* --- 4. Specular Glass Highlight running down shoulder and flank --- */}
+        <path
+          d="M12 34 C12 28, 15 25, 17 22 L17 65 C14 65, 12 62, 12 58 Z"
+          fill={`url(#glass-shine-${size})`}
+        />
+
+        {/* --- 5. Glass Lip / Ring at bottle opening --- */}
+        <rect
+          x="15.5"
+          y="8.5"
+          width="7"
+          height="3.5"
+          rx="1"
+          fill="#E0F2FE"
+          stroke="#7DD3FC"
+          strokeWidth="1.2"
+        />
+
+        {/* --- 6. Crown Cap --- */}
+        {capped ? (
+          <g>
+            <path
+              d="M14.5 5.5 C14.5 4, 16 3, 19 3 C22 3, 23.5 4, 23.5 5.5 L24 8.5 L14 8.5 Z"
+              fill="#E11D48"
+              stroke="#BE123C"
+              strokeWidth="1"
+            />
+            {/* Cap highlight */}
+            <ellipse cx="19" cy="4.5" rx="3" ry="1" fill="#FDA4AF" opacity="0.8" />
+          </g>
+        ) : (
+          /* Open lip rim */
+          <ellipse cx="19" cy="9" rx="3" ry="1" fill="#BAE6FD" />
+        )}
+      </svg>
+    </div>
+  );
+};
+
+// ==========================================
+// 2. BEVERAGE CRATE WITH BOTTLES PROPERLY NESTLED INSIDE
+// Bottles are physically enclosed inside the container compartments!
+// ==========================================
+const BeverageCrate: React.FC<{ bottleCount?: number; label?: string }> = ({
+  bottleCount = 6,
+  label = 'APEX',
+}) => {
+  return (
+    <div className="relative select-none w-28 h-20 flex flex-col items-center justify-end">
+      {/* 1. Back Wall & Interior of Crate */}
+      <div className="absolute inset-x-0 bottom-0 h-16 rounded-xl bg-blue-900 border-2 border-blue-950 shadow-md overflow-hidden">
+        {/* Interior compartment divider lines */}
+        <div className="absolute inset-0 grid grid-cols-3 gap-0.5 opacity-20 p-1">
+          <div className="border border-blue-400/40 rounded-xs" />
+          <div className="border border-blue-400/40 rounded-xs" />
+          <div className="border border-blue-400/40 rounded-xs" />
+        </div>
+      </div>
+
+      {/* 2. Bottles Sitting INSIDE the Crate (Bodies deep inside, only necks and caps emerge!) */}
+      <div className="relative z-10 w-full px-2 mb-2 flex justify-around items-end">
+        {[...Array(Math.min(bottleCount, 3))].map((_, i) => (
+          <div key={i} className="transform scale-75 origin-bottom translate-y-3">
+            <CartoonBottle filled={100} capped={true} labelled={true} size={28} />
+          </div>
+        ))}
+      </div>
+
+      {/* 3. Front Wall of Crate (Solid molded plastic covering the bottle bodies!) */}
+      <div className="relative z-20 w-full h-12 rounded-xl bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 border-2 border-blue-800 shadow-md p-1.5 flex flex-col justify-between">
+        {/* Upper rim highlight */}
+        <div className="w-full h-1 bg-blue-400/60 rounded-full" />
+
+        {/* Center Handle Slot with Brand Name */}
+        <div className="w-14 h-4 mx-auto bg-blue-900 rounded-md border border-blue-400/40 flex items-center justify-center shadow-inner">
+          <span className="text-[7px] text-blue-100 font-black tracking-widest uppercase">{label}</span>
+        </div>
+
+        {/* Molded diamond cutouts on crate face */}
+        <div className="flex justify-around items-center pt-0.5">
+          <div className="w-3.5 h-2 rounded-xs bg-blue-800/80 border border-blue-400/30" />
+          <div className="w-3.5 h-2 rounded-xs bg-blue-800/80 border border-blue-400/30" />
+          <div className="w-3.5 h-2 rounded-xs bg-blue-800/80 border border-blue-400/30" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 3. INDUSTRIAL CONVEYOR BELT SYSTEM
+// Metallic guides, dark rubber belt surface, rollers, and mechanical floor legs
+// ==========================================
+const IndustrialConveyor: React.FC<{ moving: boolean; children: React.ReactNode }> = ({
+  moving,
+  children,
+}) => {
+  return (
+    <div className="relative w-full rounded-2xl select-none pt-2">
+      {/* Upper Stainless Steel Bottle Guide Rail */}
+      <div className="relative h-3 w-full bg-gradient-to-b from-slate-200 via-white to-slate-300 border-y border-slate-400 rounded-full shadow-xs flex items-center justify-around z-10 px-6">
+        {[...Array(20)].map((_, i) => (
+          <div key={i} className="w-1 h-1 rounded-full bg-slate-500" />
+        ))}
+      </div>
+
+      {/* Main Track Surface (Where Bottles Stand Upright) */}
+      <div className="relative h-24 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 border-x-4 border-slate-600 flex items-center px-4 overflow-hidden shadow-inner">
+        {/* Moving rubber belt grooves */}
+        <motion.div
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.2) 20px, rgba(255,255,255,0.2) 24px)',
+          }}
+          animate={moving ? { backgroundPositionX: ['0px', '24px'] } : {}}
+          transition={{ repeat: Infinity, duration: 0.5, ease: 'linear' }}
+        />
+
+        {/* Mechanical Rollers visible underneath track */}
+        <div className="absolute inset-x-0 bottom-0.5 flex justify-around opacity-30 pointer-events-none">
+          {[...Array(16)].map((_, i) => (
+            <div key={i} className="w-3 h-3 rounded-full border border-slate-400 bg-slate-600" />
+          ))}
+        </div>
+
+        {/* Bottles on the track */}
+        <div className="relative w-full h-full flex items-center">
+          {children}
+        </div>
+      </div>
+
+      {/* Lower Guide Rail & Safety Hazard Stripe Beam */}
+      <div
+        className="h-3 w-full rounded-b-xl border-b-2 border-slate-500 shadow-sm"
+        style={{
+          background: 'repeating-linear-gradient(45deg, #F59E0B, #F59E0B 8px, #1E1E2E 8px, #1E1E2E 16px)',
+        }}
+      />
+
+      {/* Heavy Steel Support Legs on the Factory Floor */}
+      <div className="flex justify-around px-8 -mt-0.5">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="flex flex-col items-center">
+            <div className="w-3.5 h-4 bg-gradient-to-r from-slate-500 via-slate-400 to-slate-600 border-x border-slate-700" />
+            <div className="w-7 h-1.5 bg-slate-600 rounded-t-xs border-b border-slate-800" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 4. FACTORY PIPEWORK & CEILING NETWORK
+// Steel pipes with flanged joints and pulse flows connecting machines
+// ==========================================
+const FactoryConnectedPipes: React.FC<{ flowing: boolean }> = ({ flowing }) => {
+  return (
+    <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="pipe-metal" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#94A3B8" />
+          <stop offset="35%" stopColor="#F8FAFC" />
+          <stop offset="65%" stopColor="#CBD5E1" />
+          <stop offset="100%" stopColor="#64748B" />
+        </linearGradient>
+      </defs>
+
+      {/* Ceiling Main Header Line */}
+      <path
+        d="M 60 18 L 850 18"
+        stroke="url(#pipe-metal)"
+        strokeWidth="14"
+        strokeLinecap="round"
+      />
+
+      {/* Pipe 1: From Raw Hopper bottom elbow (x: ~140, y: 150) -> Up to ceiling -> Across to Mixing Tank (x: ~450, y: 50) */}
+      <path
+        d="M 125 140 L 125 40 Q 125 18 150 18 L 440 18 Q 460 18 460 38 L 460 55"
+        fill="none"
+        stroke="url(#pipe-metal)"
+        strokeWidth="12"
+        strokeLinejoin="round"
+      />
+
+      {/* Pipe 2: From Mixing Tank outlet (x: ~540, y: 55) -> Up to ceiling -> Across to Packaging (x: ~800, y: 70) */}
+      <path
+        d="M 540 55 L 540 38 Q 540 18 560 18 L 780 18 Q 800 18 800 38 L 800 80"
+        fill="none"
+        stroke="url(#pipe-metal)"
+        strokeWidth="10"
+        strokeLinejoin="round"
+      />
+
+      {/* Flanged Joint Rings on Pipes */}
+      <rect x="120" y="70" width="10" height="6" rx="1" fill="#64748B" />
+      <rect x="280" y="14" width="6" height="10" rx="1" fill="#64748B" />
+      <rect x="660" y="14" width="6" height="10" rx="1" fill="#64748B" />
+
+      {/* Animated fluid pulse along the pipe line when factory is running */}
+      {flowing && (
+        <>
+          <circle cx="125" cy="90" r="4" fill="#E11D48">
+            <animate attributeName="cy" values="140;40;18" dur="1.8s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="300" cy="18" r="4" fill="#E11D48">
+            <animate attributeName="cx" values="150;440" dur="1.8s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="670" cy="18" r="3.5" fill="#10B981">
+            <animate attributeName="cx" values="560;780" dur="1.8s" repeatCount="indefinite" />
+          </circle>
+        </>
+      )}
+    </svg>
+  );
+};
+
+// ==========================================
+// 5. MOVING BOTTLE STATE & MAIN FACTORY COMPONENT
+// ==========================================
+interface TrackBottle {
+  id: number;
+  x: number; // 0% to 100%
+  stage: number; // 0=Empty, 1=Filling, 2=Capped, 3=Labelled, 4=Finished
 }
 
 export const FactoryWorld: React.FC<FactoryWorldProps> = ({
@@ -36,765 +350,452 @@ export const FactoryWorld: React.FC<FactoryWorldProps> = ({
   onSelectMachine,
   selectedMachineId,
   onQuickReorder,
-  onQuickOrderDispatch,
 }) => {
-  const { machines, inventory, production, orders, status, speed } = state;
-
+  const { machines, inventory, production, orders, status, speed, currentDay } = state;
   const isRunning = status === 'RUNNING';
-  const hasActiveProduction = isRunning && production.activeMachinesCount > 0 && production.currentHourlyRate > 0;
 
-  // Station inspection state (clicking on stations opens info drawer)
-  const [inspectedStation, setInspectedStation] = useState<string | null>(null);
+  // Active production condition: Running with active machines and available raw materials
+  const hasActiveLines = production.activeMachinesCount > 0;
+  const hasMaterials = inventory.rawMaterials.quantity > 0;
+  const isProducing = isRunning && hasActiveLines && hasMaterials;
 
-  // Raw material fill percentage (max reference 8,000 units)
-  const rawMax = 8000;
-  const rawPercent = Math.min(100, Math.max(0, Math.round((inventory.rawMaterials.quantity / rawMax) * 100)));
+  // Track bottles on conveyor line
+  const [trackBottles, setTrackBottles] = useState<TrackBottle[]>([
+    { id: 1, x: 12, stage: 0 },
+    { id: 2, x: 34, stage: 1 },
+    { id: 3, x: 55, stage: 2 },
+    { id: 4, x: 74, stage: 3 },
+    { id: 5, x: 92, stage: 4 },
+  ]);
 
-  // Finished goods fill percentage (max reference 6,000 units)
-  const fgMax = 6000;
-  const fgPercent = Math.min(100, Math.max(0, Math.round((inventory.finishedGoods.quantity / fgMax) * 100)));
+  const nextBottleId = useRef(100);
+  const rafHandle = useRef<number | null>(null);
+  const lastSpawnTime = useRef(Date.now());
 
-  const activeOrders = orders.filter(o => o.status === 'IN_PRODUCTION');
+  // Continuous Sub-Pixel Smooth Movement Loop
+  useEffect(() => {
+    let lastTime = performance.now();
 
-  // Animation speed multipliers based on simulation speed
-  const conveyorDuration = isRunning ? (hasActiveProduction ? Math.max(0.4, 1.4 / speed) : 0) : 0;
-  const pistonDuration = isRunning ? (hasActiveProduction ? Math.max(0.3, 1.0 / speed) : 0) : 0;
+    const loop = (time: number) => {
+      const deltaMs = Math.min(50, time - lastTime);
+      lastTime = time;
 
-  const stations = [
-    { id: 'raw', name: 'Raw Silo', icon: Droplets, color: '#28D7F2' },
-    { id: 'filler', name: 'Bottle Filling', icon: Zap, color: '#39E58C' },
-    { id: 'capper', name: 'Precision Capping', icon: Wrench, color: '#FFB547' },
-    { id: 'labeler', name: 'Rotary Labelling', icon: Layers, color: '#9875FF' },
-    { id: 'packer', name: 'Case Packaging', icon: Box, color: '#28D7F2' },
-    { id: 'warehouse', name: 'Finished Storage', icon: Package, color: '#39E58C' },
-    { id: 'dispatch', name: 'Logistics Bay', icon: Truck, color: '#FFB547' },
-  ];
+      if (isProducing) {
+        const simSpeed = speed || 1;
+        // Move rate: smooth 10.5% per second at 1x speed
+        const advanceRate = (0.0105 * simSpeed * deltaMs) / 16.66;
+
+        setTrackBottles(prev => {
+          let updated = prev.map(b => {
+            const nextX = b.x + advanceRate;
+            let nextStage = 0;
+            if (nextX >= 86) nextStage = 4;
+            else if (nextX >= 66) nextStage = 3;
+            else if (nextX >= 46) nextStage = 2;
+            else if (nextX >= 26) nextStage = 1;
+
+            return { ...b, x: nextX, stage: nextStage };
+          });
+
+          // Filter out bottles that reach the end of the line
+          updated = updated.filter(b => b.x <= 101);
+
+          // Spawn new bottles at regular intervals
+          const now = Date.now();
+          const spawnInterval = Math.max(900, 2800 / simSpeed);
+          if (now - lastSpawnTime.current > spawnInterval && updated.length < 8) {
+            const leftmost = updated.reduce((min, b) => Math.min(min, b.x), 100);
+            if (leftmost > 18) {
+              updated.push({
+                id: nextBottleId.current++,
+                x: 0,
+                stage: 0,
+              });
+              lastSpawnTime.current = now;
+            }
+          }
+
+          return updated;
+        });
+      }
+
+      rafHandle.current = requestAnimationFrame(loop);
+    };
+
+    rafHandle.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafHandle.current) cancelAnimationFrame(rafHandle.current);
+    };
+  }, [isProducing, speed]);
+
+  const rawPercentage = Math.min(100, Math.round((inventory.rawMaterials.quantity / 8000) * 100));
+  const fulfilledOrders = orders.filter(o => o.status === 'FULFILLED');
+  const isBottleUnderFiller = trackBottles.some(b => b.x >= 28 && b.x <= 42);
 
   return (
-    <div className="relative w-full h-full min-h-[620px] bg-[#080B12] rounded-2xl overflow-hidden border border-[#263447] shadow-2xl flex flex-col select-none">
-      {/* Background Industrial Grid & Cyan Atmosphere Ambient Lighting */}
-      <div className="absolute inset-0 industrial-grid opacity-30 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-[480px] h-[360px] bg-[#28D7F2]/8 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[480px] h-[360px] bg-[#9875FF]/8 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute inset-0 scanline-overlay opacity-20 pointer-events-none" />
+    <div className="relative w-full h-full bg-white rounded-3xl overflow-hidden border-2 border-slate-200 shadow-sm flex flex-col">
+      {/* Background dot grid pattern */}
+      <div className="absolute inset-0 dot-grid opacity-60 pointer-events-none" />
 
-      {/* Top Industrial Control Room HUD Bar */}
-      <div className="relative z-20 px-5 py-3 bg-[#101722]/90 backdrop-blur-md border-b border-[#263447] flex flex-wrap items-center justify-between gap-3 text-xs">
-        {/* Left: Operational Beacon & Plant Mode */}
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2.5">
-            <span className="relative flex h-3 w-3">
-              {hasActiveProduction && (
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#39E58C] opacity-75" />
-              )}
-              <span
-                className={`relative inline-flex rounded-full h-3 w-3 ${
-                  hasActiveProduction
-                    ? 'bg-[#39E58C] shadow-glow-green'
-                    : isRunning
-                    ? 'bg-[#FFB547]'
-                    : 'bg-[#627387]'
-                }`}
-              />
-            </span>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-[#F3F7FC] tracking-wider uppercase text-[11px] font-mono">
-                {hasActiveProduction
-                  ? 'AUTOMATED BOTTLING SUITE ACTIVE'
+      {/* --- TOP SCADA STATUS BAR --- */}
+      <div className="relative z-10 px-4 py-2 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-slate-50 border-b-2 border-slate-100 flex items-center justify-between gap-3 flex-shrink-0">
+        <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-2 px-2.5 py-1 rounded-full bg-white border border-slate-200 shadow-xs">
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                isProducing
+                  ? 'bg-emerald-500 animate-pulse'
                   : isRunning
-                  ? 'PLANT STANDBY / BOTTLENECKED'
-                  : 'PLANT SHUTDOWN / OFFLINE'}
-              </span>
-              <span className="text-[10px] text-[#9AA9BB]">
-                ISO 22000 Cleanroom Level 4 • SCADA Telemetry Stream
-              </span>
-            </div>
+                  ? 'bg-amber-400'
+                  : 'bg-slate-300'
+              }`}
+            />
+            <span className="text-[11px] font-black text-slate-800">
+              {isProducing ? 'FACTORY PRODUCING' : isRunning ? 'IDLE / THROTTLED' : 'STOPPED'}
+            </span>
           </div>
 
-          <div className="h-6 w-px bg-[#263447] hidden sm:block" />
-
-          {/* Lines & Capacity */}
-          <div className="hidden md:flex items-center space-x-4 text-xs font-mono">
-            <span className="text-[#9AA9BB]">
-              Active Lines:{' '}
-              <strong className="text-[#28D7F2]">
-                {production.activeMachinesCount} / {production.totalMachinesCount}
-              </strong>
-            </span>
-            <span className="text-[#9AA9BB]">
-              Output:{' '}
-              <strong className="text-[#39E58C]">
-                {production.currentHourlyRate} b/h
-              </strong>{' '}
-              <span className="text-[#627387]">({production.currentDailyCapacity} / day)</span>
-            </span>
-            <span className="text-[#9AA9BB]">
-              Utilization:{' '}
-              <strong className="text-[#9875FF]">
-                {production.utilizationRate}%
-              </strong>
-            </span>
+          <div className="px-3 py-0.5 rounded-full bg-emerald-500 text-white font-mono font-black text-xs shadow-xs flex items-center space-x-1">
+            <span>Day</span>
+            <span>{currentDay}</span>
+            <span className="text-emerald-100">/ {state.objectives.maxDays || 7}</span>
           </div>
         </div>
 
-        {/* Right: Bottleneck Diagnostic Pill */}
-        {production.bottleneckReason ? (
-          <div className="flex items-center space-x-2 bg-[#FF5F6D]/15 border border-[#FF5F6D]/40 px-3 py-1.5 rounded-full text-[#FF5F6D] animate-pulse">
-            <AlertTriangle className="w-3.5 h-3.5 text-[#FF5F6D]" />
-            <span className="font-bold text-[11px] font-mono tracking-tight truncate max-w-sm">
-              {production.bottleneckReason}
-            </span>
-          </div>
-        ) : (
-          <div className="hidden lg:flex items-center space-x-2 bg-[#39E58C]/10 border border-[#39E58C]/25 px-3 py-1 rounded-full text-[#39E58C] text-[11px] font-mono">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Optimal Continuous Mass Balance</span>
-          </div>
-        )}
-      </div>
-
-      {/* Production Flow Sequence Breadcrumb Ribbon */}
-      <div className="relative z-10 px-5 py-2 bg-[#0B0F18]/80 border-b border-[#263447]/60 flex items-center justify-between overflow-x-auto text-[11px] font-mono scrollbar-none">
-        <div className="flex items-center space-x-2 text-[#9AA9BB]">
-          <span className="text-[10px] text-[#627387] uppercase tracking-wider font-bold">Process Flow:</span>
-          {stations.map((st, idx) => {
-            const Icon = st.icon;
-            const isLast = idx === stations.length - 1;
-            return (
-              <React.Fragment key={st.id}>
-                <button
-                  onClick={() => setInspectedStation(st.id)}
-                  className="flex items-center space-x-1 hover:text-[#28D7F2] transition-colors focus:outline-none"
-                >
-                  <Icon className="w-3 h-3 text-[#28D7F2]" />
-                  <span className="font-semibold">{st.name}</span>
-                </button>
-                {!isLast && <ArrowRight className="w-3 h-3 text-[#263447]" />}
-              </React.Fragment>
-            );
-          })}
+        <div className="hidden md:flex items-center space-x-3 text-xs font-bold text-slate-600 bg-white px-3 py-1 rounded-xl border border-slate-200 shadow-xs">
+          <span>Active Lines: <strong className="text-indigo-600">{production.activeMachinesCount}/{production.totalMachinesCount}</strong></span>
+          <span className="text-slate-300">|</span>
+          <span>Output: <strong className="text-emerald-600">{production.currentHourlyRate} b/h</strong></span>
+          <span className="text-slate-300">|</span>
+          <span>Cap: <strong className="text-purple-600">{production.currentDailyCapacity} b/d</strong></span>
+          <span className="text-slate-300">|</span>
+          <span>Util: <strong className="text-amber-600">{production.utilizationRate}%</strong></span>
         </div>
-        <span className="text-[10px] text-[#627387] hidden xl:inline">
-          Click any unit for station diagnostics
-        </span>
       </div>
 
-      {/* The Central Factory Floor Interactive World */}
-      <div className="relative flex-1 p-3 lg:p-5 overflow-x-auto overflow-y-hidden flex items-center justify-center">
-        <div className="w-full max-w-6xl min-w-[960px] h-full flex flex-col justify-between py-1">
+      {/* --- MAIN STAGE: Factory Floor (~65%) + Compact HUD (~35%) --- */}
+      <div className="relative flex-1 p-3 lg:p-4 flex flex-col justify-between overflow-y-auto space-y-3">
+        {/* UPPER FACTORY STAGE: Full Continuous Visual Environment */}
+        <div className="relative w-full min-h-[350px] lg:min-h-[380px] bg-gradient-to-b from-slate-100 via-slate-50 to-white rounded-2xl border-2 border-slate-200 p-4 shadow-inner flex flex-col justify-between flex-shrink-0 overflow-hidden">
+          {/* Connected Industrial Pipework */}
+          <FactoryConnectedPipes flowing={isProducing} />
 
-          {/* TOP STAGE: Raw Silos, Pneumatic Piping, Preform Hopper */}
-          <div className="grid grid-cols-12 gap-3.5 items-stretch h-36">
-            
-            {/* Unit 1: Raw Material Silos (Liquid Concentrate & Syrup) */}
-            <div
-              onClick={() => setInspectedStation('raw')}
-              className="col-span-4 bg-[#151F2D]/90 hover:bg-[#1B2838] border border-[#263447] hover:border-[#28D7F2]/60 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden transition-all cursor-pointer group shadow-card-industrial"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <div className="p-2 rounded-lg bg-[#28D7F2]/10 border border-[#28D7F2]/30 text-[#28D7F2]">
-                    <Droplets className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#F3F7FC] tracking-tight group-hover:text-[#28D7F2] transition-colors">
-                      Raw Ingredients Silo
-                    </h4>
-                    <p className="text-[10px] text-[#9AA9BB]">Natural Syrup, Citric Concentrate & PET</p>
-                  </div>
-                </div>
+          {/* Machinery Stations Row: Hopper -> Mixing Reservoir -> Crates */}
+          <div className="grid grid-cols-12 gap-3 items-start relative z-10 pt-1">
+            {/* 1. Raw Materials Hopper (Left) */}
+            <div className="col-span-4 md:col-span-3 flex flex-col items-center">
+              <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider mb-1 flex items-center space-x-1">
+                <span>🛢 Raw Material Hopper</span>
+              </span>
 
-                {onQuickReorder && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onQuickReorder();
-                    }}
-                    className="text-[10px] px-2.5 py-1 bg-[#28D7F2]/15 hover:bg-[#28D7F2]/30 text-[#28D7F2] border border-[#28D7F2]/40 rounded-md font-bold transition-all shadow-sm"
-                  >
-                    + Reorder
-                  </button>
-                )}
-              </div>
+              {/* Clear hopper container with round red balls inside */}
+              <div className="relative w-28 h-36 rounded-2xl bg-gradient-to-b from-white/95 to-slate-100 border-2 border-slate-400 shadow-md p-1.5 flex flex-col items-center justify-end overflow-hidden">
+                <div className="absolute -top-1 w-12 h-4 bg-slate-300 border border-slate-400 rounded-b-lg" />
 
-              {/* Liquid Silo Gauge Tank */}
-              <div className="flex items-center space-x-3.5 mt-2">
-                <div className="flex-1 bg-[#080B12]/80 rounded-lg p-2.5 border border-[#263447]">
-                  <div className="flex justify-between text-[11px] mb-1 font-mono">
-                    <span className="text-[#9AA9BB]">Supply Reserve:</span>
-                    <span
-                      className={`font-bold ${
-                        rawPercent < 20 ? 'text-[#FF5F6D] animate-pulse' : 'text-[#28D7F2]'
-                      }`}
+                {/* Floating Red Spheres */}
+                <div className="absolute inset-x-1 bottom-2 top-4 flex flex-wrap items-end justify-center gap-1 p-0.5">
+                  {[...Array(Math.min(8, Math.max(3, Math.ceil(rawPercentage / 12))))].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-6 h-6 rounded-full bg-gradient-to-br from-rose-400 via-rose-500 to-rose-700 shadow-sm border border-rose-300/60 flex items-center justify-center"
+                      animate={isProducing ? { y: [0, -3, 0] } : {}}
+                      transition={{ repeat: Infinity, duration: 1.5 + (i * 0.2), ease: 'easeInOut' }}
                     >
-                      {inventory.rawMaterials.quantity.toLocaleString()} {inventory.rawMaterials.unit}
-                    </span>
-                  </div>
-                  <div className="w-full bg-[#101722] rounded-full h-2.5 overflow-hidden p-0.5 border border-[#263447]">
-                    <motion.div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        rawPercent < 20 ? 'bg-[#FF5F6D]' : rawPercent < 40 ? 'bg-[#FFB547]' : 'bg-[#28D7F2]'
-                      }`}
-                      style={{ width: `${rawPercent}%` }}
-                    />
-                  </div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-white/70 -translate-x-0.5 -translate-y-0.5" />
+                    </motion.div>
+                  ))}
                 </div>
 
-                {/* Animated Liquid Cylindrical Vat */}
-                <div className="w-14 h-14 relative bg-[#080B12] border-2 border-[#263447] rounded-lg overflow-hidden flex flex-col justify-end p-0.5 shadow-inner">
-                  <motion.div
-                    className="w-full bg-[#28D7F2]/70 rounded-xs relative"
-                    style={{ height: `${rawPercent}%` }}
-                  >
-                    {hasActiveProduction && (
-                      <div className="absolute inset-0 bg-[#28D7F2]/40 animate-liquid-fill" />
-                    )}
-                  </motion.div>
-                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono font-black text-[#F3F7FC] drop-shadow-md">
-                    {rawPercent}%
-                  </span>
+                {/* Level Counter */}
+                <div className="relative z-10 bg-white/90 px-1.5 py-0.5 rounded border border-slate-300 text-[9px] font-mono font-black text-slate-700">
+                  {inventory.rawMaterials.quantity.toLocaleString()} un.
                 </div>
               </div>
 
-              <div className="text-[10px] text-[#627387] flex items-center justify-between mt-1">
-                <span>Unit Cost: ${inventory.rawMaterials.unitCost.toFixed(2)}</span>
-                <span className="flex items-center text-[#39E58C] font-mono font-semibold">
-                  <Zap className="w-3 h-3 mr-1" /> Pressure Fed
-                </span>
-              </div>
-            </div>
-
-            {/* Unit 2: High-Pressure Stainless Feed Pipe Bridge */}
-            <div className="col-span-4 flex flex-col items-center justify-center relative">
-              <div className="w-full h-10 bg-[#101722] border-y-2 border-[#263447] flex items-center justify-around relative overflow-hidden rounded-md shadow-inner">
-                {/* Flowing liquid pattern when running */}
-                {hasActiveProduction && (
-                  <motion.div
-                    className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent,transparent_20px,#28D7F2_20px,#28D7F2_40px)] opacity-50"
-                    animate={{ x: [0, 40] }}
-                    transition={{
-                      repeat: Infinity,
-                      ease: 'linear',
-                      duration: conveyorDuration || 1.2,
-                    }}
-                  />
-                )}
-                <div className="relative z-10 text-[10px] font-mono text-[#F3F7FC] font-extrabold px-3 py-1 bg-[#151F2D]/90 rounded border border-[#263447] shadow-sm flex items-center space-x-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#28D7F2] animate-pulse" />
-                  <span>Pneumatic Fluid & Preform Feed Conduit</span>
-                </div>
-              </div>
-              <span className="text-[9px] font-mono text-[#627387] mt-1.5 uppercase tracking-wider">
-                Ultra-Clean Mass Flow Line (1.0 units / bottle)
-              </span>
-            </div>
-
-            {/* Unit 3: Bottle Preform Feeder & Sterilization Chamber */}
-            <div
-              onClick={() => setInspectedStation('filler')}
-              className="col-span-4 bg-[#151F2D]/90 hover:bg-[#1B2838] border border-[#263447] hover:border-[#39E58C]/60 rounded-xl p-3.5 flex flex-col justify-between cursor-pointer group transition-all shadow-card-industrial"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <div className="p-2 rounded-lg bg-[#39E58C]/10 border border-[#39E58C]/30 text-[#39E58C]">
-                    <Activity className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#F3F7FC] tracking-tight group-hover:text-[#39E58C] transition-colors">
-                      Preform Loader & Heat Chamber
-                    </h4>
-                    <p className="text-[10px] text-[#9AA9BB]">Infrared Blow-Molding & Sterilization</p>
-                  </div>
-                </div>
-                <span className="text-[10px] px-2 py-0.5 bg-[#39E58C]/10 border border-[#39E58C]/30 text-[#39E58C] rounded font-mono font-bold">
-                  99.8% Eff
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                <div className="bg-[#080B12]/80 border border-[#263447] rounded-lg p-2 text-center">
-                  <div className="text-[9px] text-[#9AA9BB] uppercase">Mold Temp</div>
-                  <div className="text-xs font-mono font-bold text-[#39E58C]">118°C Stable</div>
-                </div>
-                <div className="bg-[#080B12]/80 border border-[#263447] rounded-lg p-2 text-center">
-                  <div className="text-[9px] text-[#9AA9BB] uppercase">Air Blow Rate</div>
-                  <div className="text-xs font-mono font-bold text-[#28D7F2]">40 Bar High</div>
-                </div>
-              </div>
-
-              <div className="text-[10px] text-[#9AA9BB] flex items-center justify-between mt-1">
-                <span>Cycle Output:</span>
-                <span className="text-[#F3F7FC] font-mono font-bold">
-                  {production.totalUnitsProduced.toLocaleString()} units lifetime
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* MIDDLE STAGE: The Automated Conveyor System with VISIBLY ANIMATED BOTTLES */}
-          <div className="my-4 relative">
-            
-            {/* Top Conveyor Guide Rails & Industrial Track */}
-            <div className="relative w-full h-16 bg-[#0E1520] border-y-2 border-[#263447] rounded-xl flex items-center overflow-hidden shadow-2xl">
-              {/* Conveyor track moving ribbed treads */}
-              <motion.div
-                className="absolute inset-0 bg-[repeating-linear-gradient(90deg,#151F2D,#151F2D_16px,#080B12_16px,#080B12_32px)] opacity-60 pointer-events-none"
-                animate={hasActiveProduction ? { x: [0, 32] } : { x: 0 }}
-                transition={{
-                  repeat: Infinity,
-                  duration: conveyorDuration || 1.4,
-                  ease: 'linear',
-                }}
-              />
-
-              {/* Hazard Safety Border Striping */}
-              <div className="absolute top-0 inset-x-0 h-1 bg-[repeating-linear-gradient(45deg,#FFB547,#FFB547_8px,#080B12_8px,#080B12_16px)] opacity-40" />
-              <div className="absolute bottom-0 inset-x-0 h-1 bg-[repeating-linear-gradient(45deg,#FFB547,#FFB547_8px,#080B12_8px,#080B12_16px)] opacity-40" />
-
-              {/* MANDATORY ANIMATED BOTTLE STAGES ALONG THE CONVEYOR */}
-              <div className="relative z-10 w-full h-full flex items-center justify-between px-6 pointer-events-none">
-                
-                {/* Stage 1: Empty Bottle Supply Inlet */}
-                <div className="flex items-center space-x-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-1.5 h-1.5 bg-slate-600 rounded-t-xs" />
-                    <div className="w-4 h-7 border border-slate-500/80 bg-slate-800/30 rounded-xs shadow-sm" />
-                    <span className="text-[8px] font-mono text-[#9AA9BB] mt-0.5">Empty Preform</span>
-                  </div>
-
-                  {/* Flow Arrow */}
-                  <motion.div
-                    animate={hasActiveProduction ? { x: [0, 4, 0] } : {}}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                    className="text-[#28D7F2]"
-                  >
-                    →
-                  </motion.div>
-                </div>
-
-                {/* Stage 2: Bottle Filling Station (Liquid Rises Inside) */}
-                <div className="flex items-center space-x-3">
-                  <div className="flex flex-col items-center relative">
-                    {/* Mechanical Filling Nozzle */}
-                    <motion.div
-                      animate={hasActiveProduction ? { y: [0, 5, 0] } : { y: 0 }}
-                      transition={{ repeat: Infinity, duration: pistonDuration || 1 }}
-                      className="w-1.5 h-3 bg-[#28D7F2] rounded-t-xs mb-0.5 shadow-glow-cyan"
-                    />
-                    {/* Bottle with Rising Liquid */}
-                    <div className="w-4 h-7 border border-[#28D7F2] bg-slate-900 rounded-xs overflow-hidden flex flex-col justify-end p-0.5 relative">
-                      <motion.div
-                        className="w-full bg-[#28D7F2]"
-                        animate={hasActiveProduction ? { height: ['20%', '95%', '20%'] } : { height: '80%' }}
-                        transition={{ repeat: Infinity, duration: pistonDuration || 1 }}
-                      />
-                    </div>
-                    <span className="text-[8px] font-mono text-[#28D7F2] mt-0.5 font-bold">1. Filling</span>
-                  </div>
-
-                  <motion.div
-                    animate={hasActiveProduction ? { x: [0, 4, 0] } : {}}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                    className="text-[#39E58C]"
-                  >
-                    →
-                  </motion.div>
-                </div>
-
-                {/* Stage 3: Precision Capping Station (Cap Presses Down) */}
-                <div className="flex items-center space-x-3">
-                  <div className="flex flex-col items-center relative">
-                    {/* Capping Chuck */}
-                    <motion.div
-                      animate={hasActiveProduction ? { y: [0, 4, 0] } : { y: 0 }}
-                      transition={{ repeat: Infinity, duration: pistonDuration || 1, delay: 0.2 }}
-                      className="w-2.5 h-2 bg-[#FFB547] rounded-t-xs mb-0.5 shadow-sm"
-                    />
-                    {/* Capped Bottle */}
-                    <div className="w-4 h-7 border border-[#28D7F2] bg-slate-900 rounded-xs overflow-hidden flex flex-col justify-end p-0.5 relative">
-                      <div className="w-full h-full bg-[#28D7F2]/80" />
-                    </div>
-                    <span className="text-[8px] font-mono text-[#FFB547] mt-0.5 font-bold">2. Capping</span>
-                  </div>
-
-                  <motion.div
-                    animate={hasActiveProduction ? { x: [0, 4, 0] } : {}}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                    className="text-[#9875FF]"
-                  >
-                    →
-                  </motion.div>
-                </div>
-
-                {/* Stage 4: High-Speed Labelling Station (Apex Label Wrap) */}
-                <div className="flex items-center space-x-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-1.5 h-1.5 bg-[#FFB547] rounded-t-xs" />
-                    {/* Bottle with Apex Branded Label Band */}
-                    <div className="w-4 h-7 border border-[#28D7F2] bg-slate-900 rounded-xs overflow-hidden flex flex-col justify-between p-0.5 relative">
-                      <div className="w-full h-2 bg-[#28D7F2]/80" />
-                      {/* Branded Label Band */}
-                      <motion.div
-                        className="w-full h-2.5 bg-[#9875FF] border-y border-white/60 flex items-center justify-center shadow-sm"
-                        animate={hasActiveProduction ? { opacity: [0.7, 1, 0.7] } : {}}
-                        transition={{ repeat: Infinity, duration: 0.8 }}
-                      >
-                        <div className="w-2 h-0.5 bg-white rounded-full" />
-                      </motion.div>
-                      <div className="w-full h-1 bg-[#28D7F2]/80" />
-                    </div>
-                    <span className="text-[8px] font-mono text-[#9875FF] mt-0.5 font-bold">3. Labelled</span>
-                  </div>
-
-                  <motion.div
-                    animate={hasActiveProduction ? { x: [0, 4, 0] } : {}}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                    className="text-[#39E58C]"
-                  >
-                    →
-                  </motion.div>
-                </div>
-
-                {/* Stage 5: Finished Bottle Entering Packaging Station */}
-                <div className="flex items-center space-x-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-1.5 h-1.5 bg-[#FFB547] rounded-t-xs" />
-                    <div className="w-4 h-7 border border-[#39E58C] bg-[#28D7F2] rounded-xs shadow-glow-green relative flex items-center justify-center">
-                      <div className="w-full h-2.5 bg-[#9875FF]" />
-                    </div>
-                    <span className="text-[8px] font-mono text-[#39E58C] mt-0.5 font-bold">4. Inspected</span>
-                  </div>
-
-                  <motion.div
-                    animate={hasActiveProduction ? { x: [0, 4, 0] } : {}}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                    className="text-[#28D7F2]"
-                  >
-                    →
-                  </motion.div>
-                </div>
-
-                {/* Stage 6: Boxed Cases Entering Finished Goods */}
-                <div className="flex flex-col items-center">
-                  <div className="w-7 h-6 bg-[#1B2838] border border-[#28D7F2]/60 rounded-xs flex items-center justify-center text-[8px] font-mono font-black text-[#28D7F2] shadow-sm">
-                    24x
-                  </div>
-                  <span className="text-[8px] font-mono text-[#9AA9BB] mt-0.5">5. Palletized</span>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Machinery Dock: 5 Production Bays */}
-            <div className="grid grid-cols-5 gap-3 mt-3.5">
-              {machines.map((machine, index) => {
-                const isSelected = selectedMachineId === machine.id;
-                const isMachineRunning = machine.operating && machine.status === 'RUNNING' && hasActiveProduction;
-
-                return (
-                  <motion.div
-                    key={machine.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => onSelectMachine(machine.id)}
-                    className={`cursor-pointer rounded-xl p-3 border transition-all relative flex flex-col justify-between shadow-card-industrial ${
-                      isSelected
-                        ? 'bg-[#1B2838] border-[#28D7F2] shadow-glow-cyan'
-                        : machine.operating
-                        ? 'bg-[#151F2D] border-[#263447] hover:border-[#28D7F2]/60'
-                        : 'bg-[#101722]/80 border-[#263447]/60 opacity-65'
-                    }`}
-                  >
-                    {/* Machine Header */}
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center space-x-1.5 min-w-0">
-                        <span
-                          className={`w-2 h-2 rounded-full ${
-                            isMachineRunning
-                              ? 'bg-[#39E58C] shadow-glow-green animate-pulse'
-                              : machine.operating
-                              ? 'bg-[#FFB547]'
-                              : 'bg-[#627387]'
-                          }`}
-                        />
-                        <span className="text-[11px] font-bold text-[#F3F7FC] truncate">{machine.name}</span>
-                      </div>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#080B12] text-[#9AA9BB] border border-[#263447]">
-                        {machine.id}
-                      </span>
-                    </div>
-
-                    {/* Machine Mechanical Graphic & Rotating Gears */}
-                    <div className="h-20 bg-[#080B12] rounded-lg border border-[#263447] relative flex items-center justify-center overflow-hidden my-1">
-                      <div className="relative flex items-center justify-center">
-                        <motion.div
-                          animate={isMachineRunning ? { rotate: 360 } : { rotate: 0 }}
-                          transition={{
-                            repeat: Infinity,
-                            duration: pistonDuration ? pistonDuration * 2 : 2,
-                            ease: 'linear',
-                          }}
-                          className={`w-11 h-11 rounded-full border-2 border-dashed flex items-center justify-center ${
-                            isMachineRunning ? 'border-[#28D7F2] text-[#28D7F2]' : 'border-[#627387] text-[#627387]'
-                          }`}
-                        >
-                          <Wrench className="w-5 h-5" />
-                        </motion.div>
-
-                        {/* Liquid Injection Effect */}
-                        {isMachineRunning && (
-                          <motion.div
-                            animate={{ scale: [0.8, 1.3, 0.8] }}
-                            transition={{ repeat: Infinity, duration: 1 }}
-                            className="absolute -top-1 w-3 h-3 bg-[#28D7F2] rounded-full blur-[2px]"
-                          />
-                        )}
-                      </div>
-
-                      {/* State Tag Overlay */}
-                      <div className="absolute bottom-1 right-1">
-                        <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-black uppercase ${
-                            isMachineRunning
-                              ? 'bg-[#39E58C]/15 text-[#39E58C] border border-[#39E58C]/40'
-                              : machine.operating
-                              ? 'bg-[#FFB547]/15 text-[#FFB547] border border-[#FFB547]/40'
-                              : 'bg-[#101722] text-[#627387]'
-                          }`}
-                        >
-                          {machine.operating ? 'RUNNING' : 'STANDBY'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Machine Telemetry Footer */}
-                    <div className="mt-1.5 text-[10px] text-[#9AA9BB] flex items-center justify-between font-mono">
-                      <span>Rated:</span>
-                      <span className="font-bold text-[#28D7F2]">
-                        {machine.productionCapacity} b/d
-                      </span>
-                    </div>
-                    <div className="text-[10px] text-[#9AA9BB] flex items-center justify-between font-mono">
-                      <span>Reliability:</span>
-                      <span className="font-bold text-[#39E58C]">
-                        {Math.round(machine.efficiency * 100)}%
-                      </span>
-                    </div>
-                  </motion.div>
-                );
-              })}
-
-              {/* Empty Bays Available for CapEx Expansion */}
-              {[...Array(Math.max(0, 5 - machines.length))].map((_, idx) => (
-                <div
-                  key={`empty-${idx}`}
-                  className="rounded-xl p-3 border-2 border-dashed border-[#263447] bg-[#101722]/40 flex flex-col items-center justify-center text-center text-[#627387]"
-                >
-                  <Sparkles className="w-5 h-5 mb-1.5 text-[#627387]" />
-                  <span className="text-[11px] font-bold text-[#9AA9BB]">
-                    Expansion Bay 0{machines.length + idx + 1}
-                  </span>
-                  <span className="text-[9px] text-[#627387] mt-0.5">
-                    $20,000 (+200 b/d)
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* BOTTOM STAGE: Automated Packaging, Finished Storage & Dispatch Freight Bay */}
-          <div className="grid grid-cols-12 gap-3.5 items-stretch h-36">
-            
-            {/* Unit 5: Packaging Robotic Arm Unit */}
-            <div
-              onClick={() => setInspectedStation('packer')}
-              className="col-span-3 bg-[#151F2D]/90 hover:bg-[#1B2838] border border-[#263447] hover:border-[#9875FF]/60 rounded-xl p-3.5 flex flex-col justify-between cursor-pointer group transition-all shadow-card-industrial"
-            >
-              <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded-lg bg-[#9875FF]/10 border border-[#9875FF]/30 text-[#9875FF]">
-                  <Box className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#F3F7FC] tracking-tight group-hover:text-[#9875FF] transition-colors">
-                    Automated Case Pack
-                  </h4>
-                  <p className="text-[10px] text-[#9AA9BB]">Corrugated 24-Pack Palletizer</p>
-                </div>
-              </div>
-
-              <div className="bg-[#080B12]/80 border border-[#263447] rounded-lg p-2 flex items-center justify-around font-mono text-center">
-                <div>
-                  <div className="text-[9px] text-[#9AA9BB] uppercase">Case Size</div>
-                  <div className="text-xs font-bold text-[#F3F7FC]">24 x 500ml</div>
-                </div>
-                <div className="h-6 w-px bg-[#263447]" />
-                <div>
-                  <div className="text-[9px] text-[#9AA9BB] uppercase">Robotic Arm</div>
-                  <div className="text-xs font-bold text-[#39E58C]">Synced</div>
-                </div>
-              </div>
-
-              <div className="text-[10px] text-[#627387]">
-                Automated continuous transfer to ASRS
-              </div>
-            </div>
-
-            {/* Unit 6: Finished Goods Warehouse Storage (ASRS) */}
-            <div
-              onClick={() => setInspectedStation('warehouse')}
-              className="col-span-4 bg-[#151F2D]/90 hover:bg-[#1B2838] border border-[#263447] hover:border-[#39E58C]/60 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden group transition-all cursor-pointer shadow-card-industrial"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <div className="p-2 rounded-lg bg-[#39E58C]/10 border border-[#39E58C]/30 text-[#39E58C]">
-                    <Layers className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#F3F7FC] tracking-tight group-hover:text-[#39E58C] transition-colors">
-                      Finished Goods ASRS
-                    </h4>
-                    <p className="text-[10px] text-[#9AA9BB]">Automated Climate Racking</p>
-                  </div>
-                </div>
-                <span className="text-[11px] px-2.5 py-0.5 bg-[#39E58C]/15 border border-[#39E58C]/30 text-[#39E58C] rounded font-bold font-mono">
-                  {inventory.finishedGoods.quantity.toLocaleString()} bottles
-                </span>
-              </div>
-
-              {/* Warehouse Storage Fill Bar */}
-              <div className="bg-[#080B12]/80 rounded-lg p-2.5 border border-[#263447]">
-                <div className="flex justify-between text-[11px] mb-1 font-mono">
-                  <span className="text-[#9AA9BB]">Bay Capacity:</span>
-                  <span className="text-[#39E58C] font-bold">{fgPercent}%</span>
-                </div>
-                <div className="w-full bg-[#101722] rounded-full h-2.5 overflow-hidden p-0.5 border border-[#263447]">
-                  <motion.div
-                    className="h-full rounded-full bg-[#39E58C] transition-all duration-500"
-                    style={{ width: `${fgPercent}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="text-[10px] text-[#9AA9BB] flex items-center justify-between font-mono">
-                <span>Inventory Valuation:</span>
-                <span className="font-bold text-[#39E58C]">
-                  ${Math.round(inventory.finishedGoods.quantity * inventory.finishedGoods.unitCost).toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            {/* Unit 7: Logistics Freight Bay & Outbound Transporters */}
-            <div
-              onClick={() => setInspectedStation('dispatch')}
-              className="col-span-5 bg-[#151F2D]/90 hover:bg-[#1B2838] border border-[#263447] hover:border-[#FFB547]/60 rounded-xl p-3.5 flex flex-col justify-between cursor-pointer group transition-all shadow-card-industrial"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <div className="p-2 rounded-lg bg-[#FFB547]/10 border border-[#FFB547]/30 text-[#FFB547]">
-                    <Truck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#F3F7FC] tracking-tight group-hover:text-[#FFB547] transition-colors">
-                      Freight Dispatch Dock
-                    </h4>
-                    <p className="text-[10px] text-[#9AA9BB]">Commercial Logistics & Freight Trailer</p>
-                  </div>
-                </div>
-
-                <span className="text-[10px] px-2 py-0.5 bg-[#080B12] text-[#FFB547] border border-[#263447] rounded font-mono font-bold">
-                  Dock 01 Active
-                </span>
-              </div>
-
-              {/* Delivery Commitment Progress */}
-              <div className="bg-[#080B12]/80 border border-[#263447] rounded-lg p-2.5">
-                {activeOrders.length > 0 ? (
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-bold text-[#F3F7FC] truncate max-w-[150px]">
-                        {activeOrders[0].customer}
-                      </span>
-                      <span className="text-[#FFB547] font-mono font-black">
-                        Due: Day {activeOrders[0].deadlineDay}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[10px] text-[#9AA9BB] font-mono">
-                      <span>
-                        Packed: {inventory.finishedGoods.quantity} / {activeOrders[0].quantity}
-                      </span>
-                      <span className="text-[#28D7F2] font-bold">
-                        ${(activeOrders[0].quantity * activeOrders[0].pricePerUnit).toLocaleString()} Contract
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-[11px] text-[#627387] text-center py-1 flex items-center justify-center space-x-1.5 font-mono">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#627387]" />
-                    <span>No active contract staged. Review Orders panel.</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="text-[10px] text-[#9AA9BB] flex items-center justify-between font-mono">
-                <span>Staging Status:</span>
-                <span className="text-[#39E58C] font-semibold">EDD Priority Rule Active</span>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-
-      {/* Contextual Station Diagnostics Drawer */}
-      <AnimatePresence>
-        {inspectedStation && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            className="absolute bottom-4 left-4 right-4 z-30 bg-[#151F2D]/95 border border-[#28D7F2]/40 rounded-xl p-4 backdrop-blur-xl shadow-2xl flex items-center justify-between text-xs"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-[#28D7F2]/15 text-[#28D7F2]">
-                <Activity className="w-5 h-5" />
-              </div>
-              <div>
-                <h5 className="font-bold text-[#F3F7FC] text-sm capitalize">
-                  {inspectedStation === 'raw' && 'Raw Material Supply Silo'}
-                  {inspectedStation === 'filler' && 'High-Speed Rotary Filling Station'}
-                  {inspectedStation === 'capper' && 'Automated Capping & Sealing Unit'}
-                  {inspectedStation === 'labeler' && 'Precision Rotary Labeler'}
-                  {inspectedStation === 'packer' && 'Robotic Case Packaging System'}
-                  {inspectedStation === 'warehouse' && 'Finished Goods ASRS Warehouse'}
-                  {inspectedStation === 'dispatch' && 'Freight Outbound Dock & Logistics'}
-                </h5>
-                <p className="text-[11px] text-[#9AA9BB]">
-                  Telemetry synced with authoritative simulation clock • Discrete Tick Cycle #{state.currentTick}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              {inspectedStation === 'raw' && onQuickReorder && (
+              {onQuickReorder && (
                 <button
                   onClick={onQuickReorder}
-                  className="px-3 py-1.5 rounded-lg bg-[#28D7F2] hover:bg-[#28D7F2]/80 text-[#080B12] font-bold text-xs transition-all shadow-glow-cyan"
+                  className="mt-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[10px] font-bold transition-all flex items-center space-x-1 shadow-xs"
                 >
-                  Order 2,000 Units ($4,000)
+                  <Plus className="w-3 h-3" />
+                  <span>Reorder +2k</span>
                 </button>
               )}
-              <button
-                onClick={() => setInspectedStation(null)}
-                className="px-3 py-1.5 rounded-lg bg-[#1B2838] hover:bg-[#263447] text-[#F3F7FC] font-semibold text-xs transition-colors"
-              >
-                Close Diagnostics
-              </button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            {/* Space for Pipe Crossing */}
+            <div className="hidden md:block col-span-2" />
+
+            {/* 2. Juice Mixing & Overhead Dispenser Nozzle (Center) */}
+            <div className="col-span-8 md:col-span-4 flex flex-col items-center">
+              <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider mb-1">
+                🧪 Juice Mixing & Reservoir
+              </span>
+
+              {/* Mixing Tank with Sloshing Liquid */}
+              <div className="relative w-56 h-20 rounded-2xl bg-slate-100 border-2 border-slate-400 shadow-md overflow-hidden flex flex-col justify-end p-1.5">
+                <div className="absolute top-1 left-2 right-2 h-1.5 rounded-full bg-slate-300" />
+
+                {/* Liquid Fill */}
+                <div
+                  className="w-full rounded-xl bg-gradient-to-r from-rose-500 via-rose-600 to-rose-500 shadow-inner relative overflow-hidden transition-all duration-500"
+                  style={{ height: `${Math.max(30, rawPercentage * 0.75)}%` }}
+                >
+                  {isProducing && (
+                    <motion.div
+                      className="absolute inset-0 flex justify-around items-center"
+                      animate={{ x: [-8, 8, -8] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                    >
+                      <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
+                      <div className="w-3.5 h-3.5 rounded-full bg-white/30" />
+                      <div className="w-2 h-2 rounded-full bg-white/50" />
+                    </motion.div>
+                  )}
+                  <div className="absolute top-0 inset-x-0 h-1 bg-rose-300 opacity-60" />
+                </div>
+
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-4 bg-slate-500 rounded-b-md border border-slate-600" />
+              </div>
+
+              {/* Dispenser Pipe & Active Pouring Nozzle */}
+              <div className="relative flex flex-col items-center">
+                <div className="w-3.5 h-6 bg-slate-400 border-x border-slate-500" />
+                {/* Conical dispenser head */}
+                <div className="w-6 h-3 bg-slate-600 rounded-b-md" />
+
+                {/* Animated Juice Stream Pouring Directly into Bottle Mouth */}
+                {isProducing && isBottleUnderFiller ? (
+                  <motion.div
+                    className="w-2 h-8 bg-gradient-to-b from-rose-500 to-rose-600 rounded-full shadow-md shadow-rose-400/60"
+                    animate={{ scaleY: [0.8, 1.1, 0.9], opacity: [0.9, 1, 0.85] }}
+                    transition={{ repeat: Infinity, duration: 0.25 }}
+                  />
+                ) : (
+                  <div className="w-2 h-8" />
+                )}
+              </div>
+            </div>
+
+            {/* Space for Pipe Crossing */}
+            <div className="hidden md:block col-span-1" />
+
+            {/* 3. Packaged Stock: Stack of Beverage Crates (Bottles INSIDE!) */}
+            <div className="hidden md:flex col-span-2 flex-col items-center">
+              <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider mb-1">
+                📦 Packaged Stock
+              </span>
+
+              {/* Realistic Stack of Crates with Bottles Enclosed Inside */}
+              <div className="flex flex-col items-center space-y-[-10px]">
+                <BeverageCrate bottleCount={6} label="APEX" />
+                <div className="flex space-x-1">
+                  <div className="transform scale-90">
+                    <BeverageCrate bottleCount={6} label="APEX" />
+                  </div>
+                  <div className="transform scale-90">
+                    <BeverageCrate bottleCount={4} label="APEX" />
+                  </div>
+                </div>
+              </div>
+
+              <span className="mt-1 text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                {inventory.finishedGoods.quantity.toLocaleString()} b. ready
+              </span>
+            </div>
+          </div>
+
+          {/* Heavy Industrial Conveyor Belt with Moving Bottles */}
+          <div className="relative z-20 mt-1">
+            <IndustrialConveyor moving={isProducing}>
+              {trackBottles.map(bottle => {
+                const isUnderFilling = bottle.stage === 1;
+                const isCapped = bottle.stage >= 2;
+                const isLabelled = bottle.stage >= 3;
+                const fillPct = bottle.stage === 0 ? 0 : bottle.stage === 1 ? 75 : 100;
+
+                return (
+                  <div
+                    key={bottle.id}
+                    className="absolute bottom-2 flex flex-col items-center"
+                    style={{
+                      left: `${bottle.x}%`,
+                      transform: 'translateX(-50%)',
+                    }}
+                  >
+                    {/* The Authentic Cartoon Beverage Bottle */}
+                    <CartoonBottle
+                      size={36}
+                      filled={fillPct}
+                      capped={isCapped}
+                      labelled={isLabelled}
+                      glow={isUnderFilling && isProducing}
+                    />
+
+                    {/* Step label pill under the bottle */}
+                    <span className="text-[7.5px] font-mono font-bold text-slate-700 bg-white/95 px-1 rounded shadow-xs mt-0.5">
+                      {bottle.stage === 0
+                        ? '1. Empty'
+                        : bottle.stage === 1
+                        ? '2. Filling'
+                        : bottle.stage === 2
+                        ? '3. Capped'
+                        : bottle.stage === 3
+                        ? '4. Labelled'
+                        : '5. Packed'}
+                    </span>
+                  </div>
+                );
+              })}
+            </IndustrialConveyor>
+          </div>
+        </div>
+
+        {/* --- LOWER SECTION: 3 Compact HUD Dashboard Panels --- */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 flex-shrink-0">
+          {/* PANEL 1: Raw Material Handling */}
+          <div className="md:col-span-4 bg-white border border-slate-200 rounded-2xl p-3 shadow-xs space-y-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+              <h3 className="font-black text-slate-800 text-xs flex items-center space-x-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                <span>Raw Material Handling</span>
+              </h3>
+              <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                SCADA IN
+              </span>
+            </div>
+
+            <div className="space-y-1.5 text-[11px]">
+              <div className="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="font-semibold text-slate-600">Order quantity (Q):</span>
+                <span className="font-black font-mono text-slate-800">2,000 un.</span>
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="font-semibold text-slate-600">Reorder point (R):</span>
+                <span className="font-black font-mono text-amber-700">{inventory.rawMaterials.reorderThreshold} un.</span>
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="font-semibold text-slate-600">Raw material:</span>
+                <span className="font-black font-mono text-indigo-700">{inventory.rawMaterials.quantity.toLocaleString()} un.</span>
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="font-semibold text-slate-600">Overhead / Cost:</span>
+                <span className="font-bold font-mono text-slate-700">$200/day · $1.50/b</span>
+              </div>
+            </div>
+          </div>
+
+          {/* PANEL 2: Production Stations Table */}
+          <div className="md:col-span-5 bg-white border border-slate-200 rounded-2xl p-3 shadow-xs space-y-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+              <h3 className="font-black text-slate-800 text-xs flex items-center space-x-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Production Stations</span>
+              </h3>
+              <div className="text-[10px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
+                Output: <strong className="text-emerald-700">{production.currentDailyCapacity} b/d</strong>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-[11px] text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[9px] font-black text-slate-500 uppercase">
+                    <th className="py-1 px-1.5">Station</th>
+                    <th className="py-1 px-1.5 text-center">Mixing</th>
+                    <th className="py-1 px-1.5 text-center">Bottling</th>
+                    <th className="py-1 px-1.5 text-center">Packaging</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-mono">
+                  <tr>
+                    <td className="py-1 px-1.5 font-bold text-slate-600 font-sans">Daily prod.</td>
+                    <td className="py-1 px-1.5 text-center font-black text-slate-800">{production.currentDailyCapacity}</td>
+                    <td className="py-1 px-1.5 text-center font-black text-indigo-700">{production.currentDailyCapacity}</td>
+                    <td className="py-1 px-1.5 text-center font-black text-slate-800">{production.currentDailyCapacity}</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1 px-1.5 font-bold text-slate-600 font-sans">Machines on</td>
+                    <td className="py-1 px-1.5 text-center font-bold text-emerald-700">{production.activeMachinesCount}/{production.totalMachinesCount}</td>
+                    <td className="py-1 px-1.5 text-center font-bold text-emerald-700">{production.activeMachinesCount}/{production.totalMachinesCount}</td>
+                    <td className="py-1 px-1.5 text-center font-bold text-emerald-700">1/1</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1 px-1.5 font-bold text-slate-600 font-sans">Utilization</td>
+                    <td className="py-1 px-1.5 text-center font-black text-amber-600">{production.utilizationRate}%</td>
+                    <td className="py-1 px-1.5 text-center font-black text-indigo-600">{production.utilizationRate}%</td>
+                    <td className="py-1 px-1.5 text-center font-black text-purple-600">{Math.min(100, production.utilizationRate)}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Compact Machine Selector Buttons */}
+            <div className="flex gap-1.5 pt-0.5 overflow-x-auto">
+              {machines.map((m, idx) => {
+                const isSelected = selectedMachineId === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => onSelectMachine(m.id)}
+                    className={`flex-1 min-w-[60px] py-1 px-1.5 rounded-lg border transition-all text-center ${
+                      isSelected
+                        ? 'border-indigo-500 bg-indigo-50/70 shadow-xs'
+                        : 'border-slate-100 bg-slate-50 hover:border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center space-x-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${m.operating ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                      <span className="text-[9px] font-black text-slate-800">Line {idx + 1}</span>
+                    </div>
+                    <div className="text-[8px] font-mono text-slate-500">{m.productionCapacity}/d</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* PANEL 3: Demand & Performance */}
+          <div className="md:col-span-3 bg-white border border-slate-200 rounded-2xl p-3 shadow-xs space-y-2">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+              <h3 className="font-black text-slate-800 text-xs flex items-center space-x-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span>Demand & Performance</span>
+              </h3>
+            </div>
+
+            {/* Sleek Compact Cash Card */}
+            <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-xl p-2.5 shadow-xs text-center">
+              <div className="text-[9px] font-mono font-bold text-indigo-300 uppercase tracking-wider">
+                Treasury Reserves
+              </div>
+              <div className="text-xl font-black font-mono tracking-tight text-emerald-400 mt-0.5">
+                ${Math.round(state.business.cash).toLocaleString()}
+              </div>
+              <div className="text-[9px] font-mono text-slate-400">
+                Profit: <span className={state.business.profit >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                  ${Math.round(state.business.profit).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-1.5 text-[11px]">
+              <div className="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="font-semibold text-slate-600">Finished goods:</span>
+                <span className="font-black font-mono text-emerald-700">{inventory.finishedGoods.quantity.toLocaleString()} b.</span>
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="font-semibold text-slate-600">Orders fulfilled:</span>
+                <span className="font-black font-mono text-indigo-700">{fulfilledOrders.length} / {orders.length}</span>
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="font-semibold text-slate-600">Price per bottle:</span>
+                <span className="font-black font-mono text-slate-800">$20.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

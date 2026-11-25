@@ -52,5 +52,14 @@ describe('Player Commands & Business Rules Validation', () => {
     expect(history[0].result).toBe('SUCCESS');
     expect(history[1].result).toBe('REJECTED');
   });
+
+  it('validates manual order dispatch against finished goods inventory', () => {
+    engine.dispatch({ type: 'ACCEPT_ORDER', orderId: 'ORDER-001' });
+
+    // Inventory of finished goods is 0 initially -> should reject dispatch
+    const dispatchFail = engine.dispatch({ type: 'DISPATCH_ORDER', orderId: 'ORDER-001' });
+    expect(dispatchFail.success).toBe(false);
+    expect(dispatchFail.error).toContain('Insufficient finished goods');
+  });
 });
 

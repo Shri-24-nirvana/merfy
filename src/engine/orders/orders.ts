@@ -168,4 +168,58 @@ export class OrderManager {
 
     return events;
   }
+
+  public manualDispatch(orderId: string, tick: number, day: number): { success: boolean; message: string; revenue?: number; event?: DomainEvent } {
+    const order = this.orders.find(o => o.id === orderId);
+    if (!order) {
+      return { success: false, message: `Order ${orderId} not found.` };
+    }
+    if (order.status !== 'IN_PRODUCTION') {
+      return { success: false, message: `Order ${orderId} cannot be dispatched from status ${order.status}.` };
+    }
+
+    const remainingNeeded = order.remainingQuantity;
+    const availableFG = this.inventoryManager.getFinishedGoodsQuantity();
+
+    if (availableFG < remainingNeeded) {
+      return {
+        success: false,
+        message: `Insufficient finished goods in warehouse (${availableFG.toLocaleString()} available, ${remainingNeeded.toLocaleString()} required).`,
+      };
+    }
+
+    this.inventoryManager.withdrawFinishedGoods(remainingNeeded);
+    order.fulfilledQuantity += remainingNeeded;
+    order.remainingQuantity = 0;
+    order.status = 'FULFILLED';
+
+    const paymentAmount = (order.quantity * order.pricePerUnit) - (order.depositReceived || 0);
+    this.financeManager.recordRevenue(
+      paymentAmount,
+      tick,
+      day,
+      'REVENUE_ORDER',
+      `Manual shipment dispatch: ${order.id} (${order.customer}) - ${order.quantity} bottles`
+    );
+
+    const event: DomainEvent = {
+      id: `EVT-ORD-FUL-MANUAL-${order.id}-${tick}`,
+      type: 'ORDER_FULFILLED',
+      tick,
+      day,
+      hour: tick % 24,
+      timestamp: Date.now(),
+      title: 'Order Dispatched from Freight Bay!',
+      description: `Dispatched ${order.quantity.toLocaleString()} bottles to ${order.customer}. Revenue of $${paymentAmount.toLocaleString()} credited.`,
+      severity: 'success',
+      payload: { orderId: order.id, revenue: paymentAmount },
+    };
+
+    return {
+      success: true,
+      message: `Successfully loaded and dispatched ${order.quantity.toLocaleString()} bottles to ${order.customer}. Treasury credited +$${paymentAmount.toLocaleString()}.`,
+      revenue: paymentAmount,
+      event,
+    };
+  }
 }

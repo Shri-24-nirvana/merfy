@@ -41,7 +41,6 @@ export default function LiveSimulationPage() {
   const [activeSidePanel, setActiveSidePanel] = useState<'controls' | 'metrics'>('controls');
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
 
-  // Initialize simulation on mount if not already loaded
   useEffect(() => {
     if (!state || state.scenarioId !== 'apex-beverages') {
       initSimulation('apex-beverages');
@@ -50,11 +49,10 @@ export default function LiveSimulationPage() {
 
   if (!state) {
     return (
-      <div className="min-h-screen bg-[#080B12] flex flex-col items-center justify-center text-[#9AA9BB] space-y-4">
-        <div className="w-10 h-10 border-2 border-[#28D7F2] border-t-transparent rounded-full animate-spin shadow-glow-cyan" />
-        <p className="text-xs font-mono text-[#28D7F2] tracking-wider uppercase">
-          Initializing Apex Beverages SCADA Factory Floor...
-        </p>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-bold text-indigo-700">Loading Apex Beverages Factory…</p>
+        <p className="text-xs text-slate-400">Initializing simulation engine</p>
       </div>
     );
   }
@@ -70,8 +68,8 @@ export default function LiveSimulationPage() {
   const isFailed = state.status === 'FAILED';
 
   return (
-    <div className="min-h-screen h-screen flex flex-col bg-[#080B12] overflow-hidden text-[#F3F7FC]">
-      {/* Top Futuristic Command Bar */}
+    <div className="min-h-screen h-screen flex flex-col bg-slate-50 overflow-hidden" style={{ touchAction: 'pan-y' }}>
+      {/* Top Control Bar */}
       <SimulationControlBar
         state={state}
         onStart={startSimulation}
@@ -82,43 +80,38 @@ export default function LiveSimulationPage() {
         onManualTick={tickManual}
       />
 
-      {/* Completion or Bankruptcy Alert Banner */}
+      {/* Completion / Failure Banner */}
       {(isCompleted || isFailed) && (
         <div
-          className={`w-full py-2.5 px-6 flex items-center justify-between text-xs font-bold z-40 select-none shadow-lg ${
+          className={`w-full py-3 px-6 flex items-center justify-between text-sm font-bold z-40 select-none shadow-md ${
             isCompleted
-              ? 'bg-[#39E58C] text-[#080B12] shadow-glow-green'
-              : 'bg-[#FF5F6D] text-white shadow-glow-coral'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white'
+              : 'bg-gradient-to-r from-red-500 to-rose-500 text-white'
           }`}
         >
-          <div className="flex items-center space-x-2 font-mono">
-            {isCompleted ? (
-              <Sparkles className="w-4 h-4 fill-current" />
-            ) : (
-              <AlertTriangle className="w-4 h-4" />
-            )}
-            <span className="font-bold">
+          <div className="flex items-center space-x-2">
+            {isCompleted ? <Sparkles className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+            <span>
               {isCompleted
-                ? 'Simulation Shift Concluded! 7 Virtual Days Completed.'
-                : 'Insolvency Alert: Treasury cash breached minimum credit limit.'}
+                ? '🎉 Simulation Complete! 7 Virtual Days Finished.'
+                : '⚠ Insolvency! Treasury cash breached minimum limit.'}
             </span>
           </div>
-
           <button
             onClick={() => router.push('/simulation/results')}
-            className="py-1 px-4 rounded-lg bg-[#080B12] text-[#F3F7FC] hover:bg-[#151F2D] transition-colors flex items-center space-x-1.5 font-bold font-mono border border-white/20"
+            className="py-1.5 px-4 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-colors flex items-center space-x-1.5 font-bold border border-white/30"
           >
-            <Award className="w-3.5 h-3.5 text-[#FFB547]" />
-            <span>Open Final Assessment</span>
+            <Award className="w-3.5 h-3.5" />
+            <span>View Results</span>
           </button>
         </div>
       )}
 
-      {/* Main Viewport: The Factory World occupies the vast majority */}
+      {/* Main Viewport */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-        {/* Central Stage: The Living Virtual Factory */}
-        <section className="flex-1 h-full p-2 sm:p-4 overflow-hidden flex flex-col justify-between relative">
-          <div className="flex-1 w-full h-full relative">
+        {/* Factory World */}
+        <section className="flex-1 h-full p-2 sm:p-3 overflow-y-auto flex flex-col relative">
+          <div className="flex-1 w-full relative min-h-[560px]">
             <FactoryWorld
               state={state}
               onSelectMachine={handleSelectMachine}
@@ -129,43 +122,66 @@ export default function LiveSimulationPage() {
             />
           </div>
 
-          {/* Quick toggle bar on mobile/desktop to switch between Controls and BI Telemetry */}
-          <div className="mt-2 flex items-center justify-between bg-[#151F2D]/90 border border-[#263447] rounded-xl px-4 py-2 text-xs">
-            <div className="flex items-center space-x-2">
-              <span className="text-[#9AA9BB] font-mono text-[11px] hidden sm:inline">Dock View:</span>
+          {/* Panel toggle buttons */}
+          <div className="flex items-center justify-between pt-2 lg:hidden">
+            <div className="flex items-center space-x-2 bg-white border-2 border-slate-100 rounded-2xl p-1.5 shadow-sm">
               <button
                 onClick={() => setActiveSidePanel('controls')}
-                className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg font-bold font-mono text-xs transition-all ${
+                className={`flex items-center space-x-1.5 px-3 py-1 rounded-xl font-bold text-xs transition-all ${
                   activeSidePanel === 'controls'
-                    ? 'bg-[#28D7F2] text-[#080B12] shadow-glow-cyan'
-                    : 'text-[#9AA9BB] hover:text-[#F3F7FC]'
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <Sliders className="w-3.5 h-3.5" />
-                <span>Management Controls</span>
+                <span>Controls</span>
               </button>
-
               <button
                 onClick={() => setActiveSidePanel('metrics')}
-                className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg font-bold font-mono text-xs transition-all ${
+                className={`flex items-center space-x-1.5 px-3 py-1 rounded-xl font-bold text-xs transition-all ${
                   activeSidePanel === 'metrics'
-                    ? 'bg-[#28D7F2] text-[#080B12] shadow-glow-cyan'
-                    : 'text-[#9AA9BB] hover:text-[#F3F7FC]'
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <BarChart3 className="w-3.5 h-3.5" />
-                <span>BI Telemetry & Trends</span>
+                <span>Analytics</span>
               </button>
             </div>
-
-            <div className="text-[11px] font-mono text-[#627387] hidden sm:block">
-              Click machinery or process units for live diagnostics
+            <div className="text-[11px] text-slate-400 hidden sm:block">
+              Click machines to inspect
             </div>
           </div>
         </section>
 
-        {/* Right Collapsible Dock: Management Controls or BI Telemetry */}
-        <aside className="w-full lg:w-[420px] xl:w-[460px] h-[320px] lg:h-full border-t lg:border-t-0 lg:border-l border-[#263447] flex-shrink-0 bg-[#151F2D] flex flex-col overflow-hidden">
+        {/* Sidebar */}
+        <aside className="w-full lg:w-[400px] xl:w-[440px] h-[320px] lg:h-full border-t-2 lg:border-t-0 lg:border-l-2 border-slate-100 flex-shrink-0 bg-white flex flex-col overflow-hidden">
+          {/* Desktop tab switcher */}
+          <div className="hidden lg:flex items-center space-x-2 px-4 pt-3 pb-0 border-b-2 border-slate-100">
+            <button
+              onClick={() => setActiveSidePanel('controls')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all mb-2 ${
+                activeSidePanel === 'controls'
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Management Controls</span>
+            </button>
+            <button
+              onClick={() => setActiveSidePanel('metrics')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all mb-2 ${
+                activeSidePanel === 'metrics'
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>BI Analytics</span>
+            </button>
+          </div>
+
           {activeSidePanel === 'controls' ? (
             <ManagementControlsPanel
               state={state}
@@ -178,7 +194,7 @@ export default function LiveSimulationPage() {
         </aside>
       </div>
 
-      {/* Machine Inspection Modal */}
+      {/* Machine Inspector Modal */}
       {isInspectorOpen && selectedMachine && (
         <MachineInspectionModal
           machine={selectedMachine}
@@ -193,7 +209,7 @@ export default function LiveSimulationPage() {
         />
       )}
 
-      {/* Real-time Toast Alert */}
+      {/* Toast */}
       <ToastAlert event={activeToast} onDismiss={dismissToast} />
     </div>
   );

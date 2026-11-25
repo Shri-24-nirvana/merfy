@@ -331,6 +331,33 @@ export class CommandProcessor {
         break;
       }
 
+      case 'DISPATCH_ORDER': {
+        const dispatchRes = orderManager.manualDispatch(command.orderId, currentTick, currentDay);
+        if (!dispatchRes.success) {
+          result = {
+            success: false,
+            commandType: command.type,
+            error: dispatchRes.message,
+            message: dispatchRes.message,
+          };
+          break;
+        }
+
+        if (dispatchRes.event) {
+          events.push(dispatchRes.event);
+        }
+
+        financialImpact = dispatchRes.revenue;
+
+        result = {
+          success: true,
+          commandType: command.type,
+          message: dispatchRes.message,
+          financialImpact: dispatchRes.revenue,
+        };
+        break;
+      }
+
       default:
         result = {
           success: false,
