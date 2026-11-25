@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSimulationStore } from '@/application/simulation-session/simulation-store';
 import { SimulationControlBar } from '@/components/controls/SimulationControlBar';
 import { FactoryWorld } from '@/world/manufacturing/FactoryWorld';
+import { DomainSimulationWorld } from '@/world/domain/DomainSimulationWorld';
 import { ManagementControlsPanel } from '@/components/controls/ManagementControlsPanel';
 import { BusinessIntelligencePanel } from '@/components/metrics/BusinessIntelligencePanel';
 import { MachineInspectionModal } from '@/components/inspection/MachineInspectionModal';
@@ -102,15 +103,25 @@ export default function UniversalSimulationPage({ scenarioId }: UniversalSimulat
       )}
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-        {/* Factory / Simulation World */}
+        {/* Simulation World Viewport */}
         <section className="flex-1 h-full p-2 sm:p-3 overflow-y-auto flex flex-col relative">
           <div className="flex-1 w-full relative min-h-[560px]">
-            <FactoryWorld
-              state={state}
-              onSelectMachine={handleSelectMachine}
-              selectedMachineId={selectedMachineId}
-              onQuickReorder={() => dispatchCommand({ type: 'ORDER_RAW_MATERIALS', quantity: 2000 })}
-            />
+            {scenario?.domain === 'Manufacturing' ? (
+              <FactoryWorld
+                state={state}
+                onSelectMachine={handleSelectMachine}
+                selectedMachineId={selectedMachineId}
+                onQuickReorder={() => dispatchCommand({ type: 'ORDER_RAW_MATERIALS', quantity: 2000 })}
+              />
+            ) : (
+              <DomainSimulationWorld
+                domain={scenario?.domain || 'Retail'}
+                state={state}
+                onSelectMachine={handleSelectMachine}
+                selectedMachineId={selectedMachineId}
+                onQuickAction={() => dispatchCommand({ type: 'ORDER_RAW_MATERIALS', quantity: 2000 })}
+              />
+            )}
           </div>
 
           {/* Panel toggle buttons for mobile / smaller screens */}
