@@ -304,7 +304,242 @@ const FactoryConnectedPipes: React.FC<{ flowing: boolean }> = ({ flowing }) => {
 };
 
 // ==========================================
-// 4. FAST, SILKY-SMOOTH BOTTLING CONVEYOR BELT (60 FPS SUBPIXEL MOVEMENT)
+// 4. PURBLE-INSPIRED BEVERAGE MODULAR COUNTER CONTROLS
+// Modular cabinetry below the conveyor with bevelled buttons:
+// 1: Bottle Mold | 2: Juice Flavor | 3: Fizz Level | 4: Crown Cap | 5: Brand Label | 6: Supply & Turbo
+// ==========================================
+interface BeverageModularControlsProps {
+  bottleMold: 'contour' | 'sleek' | 'vintage';
+  onSelectMold: (mold: 'contour' | 'sleek' | 'vintage') => void;
+  flavor: 'ruby' | 'citrus' | 'blue';
+  onSelectFlavor: (flavor: 'ruby' | 'citrus' | 'blue') => void;
+  capColor: 'red' | 'gold' | 'blue';
+  onSelectCap: (color: 'red' | 'gold' | 'blue') => void;
+  onTurboBoost: () => void;
+  onQuickReorder?: () => void;
+}
+
+const BeverageModularControls: React.FC<BeverageModularControlsProps> = ({
+  bottleMold,
+  onSelectMold,
+  flavor,
+  onSelectFlavor,
+  capColor,
+  onSelectCap,
+  onTurboBoost,
+  onQuickReorder,
+}) => {
+  return (
+    <div className="relative w-full bg-gradient-to-b from-sky-200 via-cyan-100 to-sky-300 border-2 border-sky-400 rounded-2xl p-2 shadow-md select-none overflow-hidden">
+      {/* Top Edge Highlight */}
+      <div className="w-full h-1 bg-white/70 rounded-full mb-1.5 shadow-xs" />
+
+      <div className="grid grid-cols-6 gap-2">
+        {/* COL 1: Bottle Silhouette / Mold */}
+        <div className="bg-sky-100/80 rounded-xl border border-sky-300/80 p-1 flex flex-col space-y-1">
+          <button
+            onClick={() => onSelectMold('contour')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              bottleMold === 'contour'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Contour Bottle"
+          >
+            <div className="w-3.5 h-6 rounded-t-full rounded-b-md border-2 border-sky-500 bg-sky-100" />
+          </button>
+          <button
+            onClick={() => onSelectMold('sleek')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              bottleMold === 'sleek'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Sleek Bottle"
+          >
+            <div className="w-3 h-6 rounded-md border-2 border-sky-500 bg-sky-100" />
+          </button>
+          <button
+            onClick={() => onSelectMold('vintage')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              bottleMold === 'vintage'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Vintage Flask"
+          >
+            <div className="w-5 h-5 rounded-b-lg border-2 border-sky-500 bg-sky-100" />
+          </button>
+        </div>
+
+        {/* COL 2: Juice Flavor Syrups */}
+        <div className="bg-sky-100/80 rounded-xl border border-sky-300/80 p-1 flex flex-col space-y-1">
+          <button
+            onClick={() => onSelectFlavor('ruby')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              flavor === 'ruby'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Ruby Berry Juice"
+          >
+            <div className="w-5 h-4 rounded-b-md bg-rose-600 border border-rose-800 shadow-xs" />
+          </button>
+          <button
+            onClick={() => onSelectFlavor('citrus')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              flavor === 'citrus'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Golden Citrus / Lemon"
+          >
+            <div className="w-5 h-4 rounded-b-md bg-amber-400 border border-amber-600 shadow-xs" />
+          </button>
+          <button
+            onClick={() => onSelectFlavor('blue')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              flavor === 'blue'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Ocean Blue Fizz"
+          >
+            <div className="w-5 h-4 rounded-b-md bg-cyan-500 border border-cyan-700 shadow-xs" />
+          </button>
+        </div>
+
+        {/* COL 3: Carbonation / Fizz Levels */}
+        <div className="bg-sky-100/80 rounded-xl border border-sky-300/80 p-1 flex flex-col space-y-1">
+          <div className="w-full py-1 rounded-lg bg-amber-50 border border-amber-200/60 flex items-center justify-center text-xs cursor-pointer hover:bg-amber-100/70" title="Still Juice">
+            🧃
+          </div>
+          <div className="w-full py-1 rounded-lg bg-amber-50 border border-amber-200/60 flex items-center justify-center text-xs cursor-pointer hover:bg-amber-100/70" title="Sparkling Soda">
+            🫧
+          </div>
+          <div className="w-full py-1 rounded-lg bg-amber-50 border border-amber-200/60 flex items-center justify-center text-xs cursor-pointer hover:bg-amber-100/70" title="Nitro Sparkle">
+            ✨
+          </div>
+        </div>
+
+        {/* COL 4: Crown Cap Styles */}
+        <div className="bg-sky-100/80 rounded-xl border border-sky-300/80 p-1 flex flex-col space-y-1">
+          <button
+            onClick={() => onSelectCap('red')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              capColor === 'red'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Crimson Crown Cap"
+          >
+            <div className="w-5 h-3 rounded-full bg-rose-600 border border-rose-800" />
+          </button>
+          <button
+            onClick={() => onSelectCap('gold')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              capColor === 'gold'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Gold Seal Crown Cap"
+          >
+            <div className="w-5 h-3 rounded-full bg-amber-400 border border-amber-600" />
+          </button>
+          <button
+            onClick={() => onSelectCap('blue')}
+            className={`w-full py-1 rounded-lg border flex items-center justify-center transition-all ${
+              capColor === 'blue'
+                ? 'bg-amber-100 border-amber-400 shadow-sm scale-102'
+                : 'bg-amber-50 hover:bg-amber-100/70 border-amber-200/60'
+            }`}
+            title="Royal Blue Crown Cap"
+          >
+            <div className="w-5 h-3 rounded-full bg-blue-600 border border-blue-800" />
+          </button>
+        </div>
+
+        {/* COL 5: Branding Labels */}
+        <div className="bg-sky-100/80 rounded-xl border border-sky-300/80 p-1 grid grid-cols-2 gap-1 items-center">
+          <div className="py-1 rounded bg-amber-50 border border-amber-200/60 flex items-center justify-center text-xs cursor-pointer hover:bg-amber-100/70" title="Apex Classic">
+            🏷️
+          </div>
+          <div className="py-1 rounded bg-amber-50 border border-amber-200/60 flex items-center justify-center text-xs cursor-pointer hover:bg-amber-100/70" title="Gold Medallion">
+            🥇
+          </div>
+          <div className="py-1 rounded bg-amber-50 border border-amber-200/60 flex items-center justify-center text-xs cursor-pointer hover:bg-amber-100/70" title="Fruit Splash">
+            🍓
+          </div>
+          <div className="py-1 rounded bg-amber-50 border border-amber-200/60 flex items-center justify-center text-xs cursor-pointer hover:bg-amber-100/70" title="Organic Seal">
+            🍀
+          </div>
+        </div>
+
+        {/* COL 6: Ingredients Reorder & Turbo Press */}
+        <div className="bg-sky-100/80 rounded-xl border border-sky-300/80 p-1 flex flex-col space-y-1">
+          {onQuickReorder && (
+            <button
+              onClick={onQuickReorder}
+              className="w-full py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200/60 flex items-center justify-center text-xs transition-transform active:scale-95 shadow-2xs"
+              title="Reorder Ingredients (+2k)"
+            >
+              🧂
+            </button>
+          )}
+          <button
+            onClick={onTurboBoost}
+            className="w-full py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 border border-emerald-600 text-white font-bold text-xs shadow-sm flex items-center justify-center transition-transform active:scale-95"
+            title="Accelerate Output"
+          >
+            ⚡
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 5. FLOOR FOOT PEDAL CONTROLLER
+// Green left and right arrow buttons connected via flexible rubber cord
+// ==========================================
+const FloorPedal: React.FC<{
+  onStepLeft: () => void;
+  onStepRight: () => void;
+  isRunning: boolean;
+}> = ({ onStepLeft, onStepRight, isRunning }) => {
+  return (
+    <div className="relative flex items-center select-none pt-1">
+      {/* 3D Flexible Rubber Cord */}
+      <svg className="w-16 h-8 -mr-1" viewBox="0 0 64 32" fill="none">
+        <path d="M 4 2 Q 24 28 62 16" stroke="#475569" strokeWidth="6" strokeLinecap="round" />
+        <path d="M 4 2 Q 24 28 62 16" stroke="#64748B" strokeWidth="2.5" strokeLinecap="round" />
+      </svg>
+
+      {/* Light Cyan Pedal Base */}
+      <div className="bg-gradient-to-b from-sky-200 to-cyan-300 border-2 border-sky-400 rounded-2xl p-1.5 shadow-lg flex items-center space-x-2">
+        <button
+          onClick={onStepLeft}
+          className="w-8 h-8 rounded-full bg-gradient-to-b from-lime-400 to-emerald-500 hover:from-lime-300 hover:to-emerald-400 border-2 border-emerald-600 shadow-md flex items-center justify-center font-black text-white text-sm transition-transform active:scale-90"
+          title="Jog Conveyor Left"
+        >
+          ⬅
+        </button>
+        <button
+          onClick={onStepRight}
+          className="w-8 h-8 rounded-full bg-gradient-to-b from-lime-400 to-emerald-500 hover:from-lime-300 hover:to-emerald-400 border-2 border-emerald-600 shadow-md flex items-center justify-center font-black text-white text-sm transition-transform active:scale-90"
+          title="Run Conveyor Right"
+        >
+          ➡
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 6. FAST, SILKY-SMOOTH BOTTLING CONVEYOR BELT (60 FPS SUBPIXEL MOVEMENT)
+// With Star Exit Platform ⭐, Lavender Recycle Can ♻️, and Bottle Pedestals
 // ==========================================
 interface MovingTrackBottle {
   id: number;
@@ -316,9 +551,11 @@ interface BottlingConveyorProps {
   moving: boolean;
   speed: number;
   flavor: 'ruby' | 'citrus' | 'blue';
+  capColor: 'red' | 'gold' | 'blue';
+  bottleMold: 'contour' | 'sleek' | 'vintage';
 }
 
-const BottlingConveyor: React.FC<BottlingConveyorProps> = ({ moving, speed, flavor }) => {
+const BottlingConveyor: React.FC<BottlingConveyorProps> = ({ moving, speed, flavor, capColor, bottleMold }) => {
   // 6 evenly distributed bottles traversing the line
   const [trackBottles, setTrackBottles] = useState<MovingTrackBottle[]>([
     { id: 1, x: 8, stage: 1 },
@@ -340,8 +577,8 @@ const BottlingConveyor: React.FC<BottlingConveyorProps> = ({ moving, speed, flav
 
       if (moving) {
         const simSpeed = speed || 1;
-        // At 1x: ~0.35% per frame (traverse 100% in ~4.8 seconds)
-        const advanceRate = (0.35 * simSpeed * deltaMs) / 16.66;
+        // At 1x: ~0.38% per frame (traverse 100% in ~4.4 seconds)
+        const advanceRate = (0.38 * simSpeed * deltaMs) / 16.66;
 
         setTrackBottles(prev =>
           prev.map(b => {
@@ -368,7 +605,7 @@ const BottlingConveyor: React.FC<BottlingConveyorProps> = ({ moving, speed, flav
     };
   }, [moving, speed]);
 
-  const beltDuration = Math.max(0.12, 0.45 / (speed || 1));
+  const beltDuration = Math.max(0.12, 0.42 / (speed || 1));
 
   return (
     <div className="relative w-full select-none pt-1">
@@ -380,7 +617,7 @@ const BottlingConveyor: React.FC<BottlingConveyorProps> = ({ moving, speed, flav
       </div>
 
       {/* Main Belt Surface (Smooth moving grooves) */}
-      <div className="relative h-26 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 border-x-4 border-slate-600 flex items-center px-4 overflow-hidden shadow-inner">
+      <div className="relative h-28 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 border-x-4 border-slate-600 flex items-center px-4 overflow-hidden shadow-inner">
         {/* Rapid, smooth moving grooved slats */}
         <motion.div
           className="absolute inset-0 opacity-40 pointer-events-none"
@@ -450,6 +687,29 @@ const BottlingConveyor: React.FC<BottlingConveyorProps> = ({ moving, speed, flav
         </div>
       </div>
 
+      {/* Right Star Delivery Platform & Lavender Recycle Can */}
+      <div className="absolute right-[-14px] -top-3 flex items-center space-x-2 z-20">
+        {/* Sky-Blue Star Delivery Platform ⭐ */}
+        <div className="w-16 h-12 rounded-xl bg-gradient-to-b from-sky-300 to-cyan-500 border-2 border-sky-200 shadow-lg flex items-center justify-center">
+          <motion.span
+            className="text-2xl text-yellow-300 drop-shadow-md"
+            animate={{ scale: [1, 1.15, 1], rotate: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            ⭐
+          </motion.span>
+        </div>
+
+        {/* Lavender Recycle / Waste Chute ♻️ */}
+        <div className="w-12 h-16 rounded-xl bg-gradient-to-b from-purple-300 via-purple-400 to-indigo-500 border-2 border-purple-600 shadow-md flex flex-col items-center justify-between p-1">
+          <div className="w-full h-2 rounded-full bg-purple-700/60" />
+          <div className="w-7 h-7 rounded-full bg-purple-900/80 border border-purple-300/50 flex items-center justify-center text-white text-xs font-bold shadow-inner">
+            ♻️
+          </div>
+          <div className="w-full h-1 bg-purple-200/50 rounded-full" />
+        </div>
+      </div>
+
       {/* Lower Rail & Hazard Stripes */}
       <div
         className="h-3 w-full rounded-b-xl border-b-2 border-slate-500 shadow-sm"
@@ -487,11 +747,21 @@ export const FactoryWorld: React.FC<FactoryWorldProps> = ({
   const hasMaterials = inventory.rawMaterials.quantity > 0;
   const isProducing = isRunning && hasActiveLines && hasMaterials;
 
-  // Selected flavor
+  // Selected beverage customization state
   const [flavor, setFlavor] = useState<'ruby' | 'citrus' | 'blue'>('ruby');
+  const [capColor, setCapColor] = useState<'red' | 'gold' | 'blue'>('red');
+  const [bottleMold, setBottleMold] = useState<'contour' | 'sleek' | 'vintage'>('contour');
+  const [manualJog, setManualJog] = useState(false);
 
   const rawPercentage = Math.min(100, Math.round((inventory.rawMaterials.quantity / 8000) * 100));
   const fulfilledOrders = orders.filter(o => o.status === 'FULFILLED');
+
+  const handlePedalJog = (forward: boolean) => {
+    setManualJog(true);
+    setTimeout(() => setManualJog(false), 1200);
+  };
+
+  const isConveyorMoving = isProducing || manualJog;
 
   return (
     <div className="relative w-full h-full bg-white rounded-3xl overflow-hidden border-2 border-slate-200 shadow-sm flex flex-col">
@@ -713,13 +983,40 @@ export const FactoryWorld: React.FC<FactoryWorldProps> = ({
             </div>
           </div>
 
-          {/* 4. FAST & SMOOTH INDUSTRIAL CONVEYOR BELT */}
+          {/* 4. FAST & SMOOTH INDUSTRIAL CONVEYOR BELT (WITH STAR PLATFORM & RECYCLE CAN) */}
           <div className="relative z-20 mt-1">
             <BottlingConveyor
-              moving={isProducing}
+              moving={isConveyorMoving}
               speed={speed}
               flavor={flavor}
+              capColor={capColor}
+              bottleMold={bottleMold}
             />
+          </div>
+
+          {/* 5. MODULAR CONTROL DRAWER & FLOOR FOOT PEDAL */}
+          <div className="relative z-20 w-full flex items-end justify-between gap-3 pt-2">
+            <div className="flex-1">
+              <BeverageModularControls
+                bottleMold={bottleMold}
+                onSelectMold={setBottleMold}
+                flavor={flavor}
+                onSelectFlavor={setFlavor}
+                capColor={capColor}
+                onSelectCap={setCapColor}
+                onTurboBoost={() => handlePedalJog(true)}
+                onQuickReorder={onQuickReorder}
+              />
+            </div>
+
+            {/* Floor Foot Pedal (Green Left & Right Arrow Buttons) */}
+            <div className="flex-shrink-0">
+              <FloorPedal
+                onStepLeft={() => handlePedalJog(false)}
+                onStepRight={() => handlePedalJog(true)}
+                isRunning={isConveyorMoving}
+              />
+            </div>
           </div>
         </div>
 
